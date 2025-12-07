@@ -1,0 +1,99 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Dashboard</h2>
+    <hr>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng đơn hàng</h5>
+                    <h3>@ViewBag.Statistics.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Doanh thu</h5>
+                    <h3>@ViewBag.Statistics.TotalRevenue.ToString("N0") đ</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Đơn chờ xử lý</h5>
+                    <h3>@ViewBag.Statistics.PendingOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Đơn hoàn thành</h5>
+                    <h3>@ViewBag.Statistics.CompletedOrders</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Thống kê</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Tổng sản phẩm:</strong> @ViewBag.TotalProducts</p>
+                    <p><strong>Tổng người dùng:</strong> @ViewBag.TotalUsers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Đơn hàng gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentOrders != null)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in ViewBag.RecentOrders)
+                                {
+                                    <tr>
+                                        <td>#@order.Id</td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@order.TotalAmount.ToString("N0") đ</td>
+                                        <td>@order.Status</td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "AdminOrder", new { id = order.Id })" class="btn btn-sm btn-primary">Xem</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

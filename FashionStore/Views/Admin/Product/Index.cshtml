@@ -1,0 +1,70 @@
+@{
+    ViewBag.Title = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Quản lý sản phẩm</h2>
+        <a href="@Url.Action("Create", "AdminProduct")" class="btn btn-primary">Thêm sản phẩm mới</a>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá</th>
+                <th>Tồn kho</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.Products != null)
+            {
+                foreach (var product in ViewBag.Products)
+                {
+                    <tr>
+                        <td>@product.Id</td>
+                        <td>@product.ProductName</td>
+                        <td>@product.Category?.CategoryName</td>
+                        <td>@product.FinalPrice.ToString("N0") đ</td>
+                        <td>@product.Stock</td>
+                        <td>
+                            @if (product.IsActive)
+                            {
+                                <span class="badge badge-success">Kích hoạt</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Tắt</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="@Url.Action("Details", "AdminProduct", new { id = product.Id })" class="btn btn-sm btn-info">Chi tiết</a>
+                            <a href="@Url.Action("Edit", "AdminProduct", new { id = product.Id })" class="btn btn-sm btn-warning">Sửa</a>
+                            <a href="@Url.Action("Delete", "AdminProduct", new { id = product.Id })" class="btn btn-sm btn-danger">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "AdminProduct", new { page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+

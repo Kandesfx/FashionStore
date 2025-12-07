@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - FashionStore | Thời Trang Cao Cấp</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --accent-color: #c9a063;
+            --text-color: #333;
+            --text-light: #666;
+            --border-color: #e5e5e5;
+            --bg-light: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2d2d2d 100%);
+            color: white;
+            padding: 10px 0;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        .top-bar-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-bar i {
+            color: var(--accent-color);
+        }
+
+        /* Navbar */
+        .navbar {
+            padding: 1rem 0;
+            background: white;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.12);
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .logo-main {
+            color: var(--primary-color);
+        }
+
+        .logo-accent {
+            color: var(--accent-color);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            border: 2px solid var(--border-color);
+            border-right: none;
+            padding: 10px 20px;
+            border-radius: 50px 0 0 50px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: none;
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 0 50px 50px 0;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Navbar Icons */
+        .navbar-icons {
+            gap: 15px;
+        }
+
+        .icon-link {
+            color: var(--primary-color);
+            font-size: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .icon-link:hover {
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 10px;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 10px 0;
+            margin-top: 10px;
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-light);
+            color: var(--accent-color);
+            padding-left: 25px;
+        }
+
+        /* Main Navigation */
+        .main-menu {
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        /* Buttons */
+        .btn-outline-dark {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-dark:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-dark {
+            background: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-dark:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: 60vh;
+            padding: 40px 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            margin-top: 60px;
+        }
+
+        .footer-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .footer-text {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .footer-heading {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+            padding-left: 5px;
+        }
+
+        /* Social Links */
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        /* Newsletter Form */
+        .newsletter-form .form-control {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px 0 0 25px;
+        }
+
+        .newsletter-form .form-control:focus {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--accent-color);
+            color: white;
+            box-shadow: none;
+        }
+
+        .newsletter-form .form-control::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .newsletter-form .btn {
+            border-radius: 0 25px 25px 0;
+            background: var(--accent-color);
+            border: none;
+            padding: 12px 25px;
+        }
+
+        .newsletter-form .btn:hover {
+            background: #d4b072;
+        }
+
+        .contact-info {
+            font-size: 14px;
+        }
+
+        .contact-info i {
+            color: var(--accent-color);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .back-to-top:hover {
+            background: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Mobile Responsive */
+        @@media (max-width: 991px) {
+            .logo-text {
+                font-size: 24px;
+            }
+
+            .navbar-icons {
+                gap: 10px;
+            }
+
+            .icon-link {
+                font-size: 18px;
+            }
+
+            .main-menu {
+                padding: 15px 0;
+            }
+
+            .nav-link {
+                padding: 10px 15px;
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .top-bar {
+                font-size: 11px;
+            }
+
+            .top-bar .col-md-6:last-child {
+                display: none;
+            }
+
+            .back-to-top {
+                width: 45px;
+                height: 45px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="top-bar-text">
+                        <i class="fas fa-truck"></i> Miễn phí vận chuyển cho đơn hàng trên 500.000đ
+                    </span>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="top-bar-text">
+                        <i class="fas fa-phone"></i> Hotline: 1900 1234
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand logo-text" href="@Url.Action("Index","Home")">
+                <span class="logo-main">Fashion</span><span class="logo-accent">Store</span>
+            </a>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="search-bar d-none d-lg-flex mx-4">
+                <form class="d-flex w-100" action="@Url.Action("Index", "Product")" method="get">
+                    <input class="form-control search-input" type="search" name="search" placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
+                    <button class="btn search-btn" type="submit">
+                        <i class="fas fa-search"></i>
+                </button>
+                </form>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="navbar-icons d-flex align-items-center ms-auto">
+                <!-- Giỏ hàng - Luôn hiển thị -->
+                <a href="@Url.Action("Index", "Cart")" class="icon-link position-relative me-3" title="Giỏ hàng">
+                    <i class="fas fa-shopping-bag"></i>
+                    @if (Session["UserId"] != null)
+                    {
+                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cart-badge">0</span>
+                    }
+                </a>
+
+                @if (Session["UserId"] != null)
+                {
+                    <div class="dropdown">
+                        <a class="icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Account")"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("MyOrders", "Order")"><i class="fas fa-box me-2"></i>Đơn hàng</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                    }
+                    else
+                {
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-outline-dark btn-sm me-2">Đăng nhập</a>
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-dark btn-sm">Đăng ký</a>
+                }
+
+                <button class="navbar-toggler ms-3 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Menu -->
+        <div class="collapse navbar-collapse bg-white border-top mt-3" id="mainNav">
+            <div class="container">
+                <ul class="navbar-nav main-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">Trang chủ</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Sản phẩm
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product")">Tất cả sản phẩm</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "ao-nam" })">Áo Nam</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "ao-nu" })">Áo Nữ</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "quan-nam" })">Quần Nam</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "quan-nu" })">Quần Nữ</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "vay" })">Váy</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("About", "Home")">Về chúng tôi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Contact", "Home")">Liên hệ</a>
+                    </li>
+                    @if (Session["UserId"] != null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("MyOrders", "Order")">
+                                <i class="fas fa-box me-1"></i>Đơn hàng của tôi
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Mobile Search -->
+                <div class="d-lg-none p-3">
+                    <form class="d-flex" action="@Url.Action("Index", "Product")" method="get">
+                        <input class="form-control me-2" type="search" name="search" placeholder="Tìm kiếm..." aria-label="Search">
+                        <button class="btn btn-outline-dark" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row py-5">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="footer-title">FashionStore</h5>
+                    <p class="footer-text">
+                        Thương hiệu thời trang cao cấp với những thiết kế tinh tế,
+                        mang đến phong cách sang trọng và hiện đại cho mọi người.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="footer-heading">Sản phẩm</h6>
+                    <ul class="footer-links">
+                        <li><a href="@Url.Action("Index", "Product")">Tất cả sản phẩm</a></li>
+                        <li><a href="@Url.Action("Index", "Product", new { featured = true })">Sản phẩm nổi bật</a></li>
+                        <li><a href="@Url.Action("Index", "Product", new { category = "ao-nam" })">Áo Nam</a></li>
+                        <li><a href="@Url.Action("Index", "Product", new { category = "ao-nu" })">Áo Nữ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="footer-heading">Hỗ trợ</h6>
+                    <ul class="footer-links">
+                        <li><a href="@Url.Action("Contact", "Home")">Liên hệ</a></li>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Hướng dẫn mua hàng</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h6 class="footer-heading">Đăng ký nhận tin</h6>
+                    <p class="footer-text">Nhận thông tin về sản phẩm mới và ưu đãi đặc biệt</p>
+                    <form class="newsletter-form">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Email của bạn" required>
+                            <button class="btn btn-dark" type="submit">Đăng ký</button>
+                        </div>
+                    </form>
+                    <div class="contact-info mt-3">
+                        <p class="mb-2"><i class="fas fa-phone me-2"></i>Hotline: 1900 1234</p>
+                        <p class="mb-2"><i class="fas fa-envelope me-2"></i>support@fashionstore.com</p>
+                        <p class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>123 Đường ABC, Q.1, TP.HCM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom text-center py-3">
+                <p class="mb-0">&copy; @DateTime.Now.Year FashionStore. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+        </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" title="Lên đầu trang">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            const backToTop = document.getElementById('backToTop');
+
+            if (window.pageYOffset > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+
+        // Back to top button
+        document.getElementById('backToTop').addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Update cart badge
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'block' : 'none';
+            }
+        }
+
+        // Load cart count on page load (if user is logged in)
+        @if (Session["UserId"] != null)
+        {
+            <text>
+            (function() {
+                fetch('@Url.Action("GetCartCount", "Cart")')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.count !== undefined) {
+                            updateCartBadge(data.count);
+                        }
+                    })
+                    .catch(error => console.error('Error loading cart count:', error));
+            })();
+            </text>
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function (event) {
+            const navbar = document.getElementById('mainNav');
+            const toggler = document.querySelector('.navbar-toggler');
+
+            if (navbar && toggler && !navbar.contains(event.target) && !toggler.contains(event.target)) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbar);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                }
+            }
+        });
+    </script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

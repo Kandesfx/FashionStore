@@ -1,0 +1,38 @@
+@model FashionStore.Models.Entities.Product
+
+@{
+    ViewBag.Title = "Xóa sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Xóa sản phẩm</h2>
+    <hr>
+
+    <div class="alert alert-warning">
+        <p>Bạn có chắc muốn xóa sản phẩm này? Sản phẩm sẽ được đánh dấu là không kích hoạt thay vì xóa hoàn toàn.</p>
+    </div>
+
+    <dl class="dl-horizontal">
+        <dt>Tên sản phẩm:</dt>
+        <dd>@Model.ProductName</dd>
+
+        <dt>Giá:</dt>
+        <dd>@Model.FinalPrice.ToString("N0") đ</dd>
+
+        <dt>Tồn kho:</dt>
+        <dd>@Model.Stock</dd>
+    </dl>
+
+    @using (Html.BeginForm("Delete", "AdminProduct", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="form-group">
+            <input type="submit" value="Xóa" class="btn btn-danger" />
+            <a href="@Url.Action("Index", "AdminProduct")" class="btn btn-secondary">Hủy</a>
+        </div>
+    }
+</div>
+
