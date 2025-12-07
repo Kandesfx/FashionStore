@@ -360,6 +360,8 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\web.config" />
     <None Include="packages.config" />
+    <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Home\Contact.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -371,7 +373,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="bin\App_LocalResources\" />
     <Folder Include="obj\Debug\TempPE\" />
-    <Folder Include="Scripts\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

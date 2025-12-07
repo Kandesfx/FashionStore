@@ -107,60 +107,14 @@ namespace FashionStore.Services.Implementations
 
         public IEnumerable<Product> SearchProducts(string searchTerm)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(searchTerm))
-                    return GetActiveProducts();
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return GetActiveProducts();
 
-                // Normalize từ khóa tìm kiếm: trim và lowercase
-                var searchTermNormalized = (searchTerm ?? string.Empty).Trim().ToLowerInvariant();
-                
-                if (string.IsNullOrWhiteSpace(searchTermNormalized))
-                    return GetActiveProducts();
-                
-                // Load tất cả sản phẩm active vào memory để đảm bảo ToLower() hoạt động đúng
-                var allActiveProducts = _productRepository.Find(p => p.IsActive).ToList();
-                
-                // Filter với cả ProductName và searchTerm đều lowercase
-                var results = allActiveProducts
-                    .Where(p => 
-                    {
-                        try
-                        {
-                            if (string.IsNullOrWhiteSpace(p?.ProductName))
-                                return false;
-                            
-                            // Normalize ProductName: trim và lowercase
-                            var productNameNormalized = p.ProductName.Trim().ToLowerInvariant();
-                            
-                            // Kiểm tra ProductName chứa searchTerm
-                            if (productNameNormalized.Contains(searchTermNormalized))
-                                return true;
-                            
-                            // Kiểm tra Description nếu có
-                            if (!string.IsNullOrWhiteSpace(p.Description))
-                            {
-                                var descriptionNormalized = p.Description.Trim().ToLowerInvariant();
-                                if (descriptionNormalized.Contains(searchTermNormalized))
-                                    return true;
-                            }
-                            
-                            return false;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
-                    })
-                    .ToList();
-                
-                return results;
-            }
-            catch (Exception)
-            {
-                // Nếu có lỗi, trả về danh sách rỗng thay vì throw exception
-                return new List<Product>();
-            }
+            var term = searchTerm.ToLower();
+            return _productRepository
+                .Find(p => p.IsActive && 
+                    (p.ProductName.ToLower().Contains(term) || 
+                     (p.Description != null && p.Description.ToLower().Contains(term))));
         }
 
         public IEnumerable<Product> GetProductsWithPaging(int page, int pageSize, out int totalCount)

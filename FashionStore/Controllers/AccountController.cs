@@ -40,9 +40,15 @@ namespace FashionStore.Controllers
                 if (_userService.Login(model.Username, model.Password))
                 {
                     var user = _userService.GetByUsername(model.Username);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError("", "Người dùng không tồn tại");
+                        return View(model);
+                    }
+
                     Session["UserId"] = user.Id;
                     Session["Username"] = user.Username;
-                    Session["Role"] = user.Role.RoleName;
+                    Session["Role"] = user.Role?.RoleName ?? "User";
                     Session["FullName"] = user.FullName;
 
                     return RedirectToAction("Index", "Home");
@@ -75,7 +81,6 @@ namespace FashionStore.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Register(RegisterViewModel model)
         {
-            // Kiểm tra ModelState validation (Required, StringLength, EmailAddress, Compare, etc.)
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -83,14 +88,19 @@ namespace FashionStore.Controllers
 
             try
             {
-                // Đăng ký user mới - method này sẽ:
-                // 1. Kiểm tra username và email đã tồn tại chưa
-                // 2. Hash password
-                // 3. Tạo user mới và lưu vào database
                 _userService.Register(model);
                 
-                // Đăng ký thành công - chuyển hướng về trang đăng nhập
-                return RedirectToAction("Login", "Account");
+                // Auto login after registration
+                var user = _userService.GetByUsername(model.Username);
+                if (user != null)
+                {
+                    Session["UserId"] = user.Id;
+                    Session["Username"] = user.Username;
+                    Session["Role"] = user.Role?.RoleName ?? "User";
+                    Session["FullName"] = user.FullName;
+                }
+
+                return RedirectToAction("Index", "Home");
             }
             catch (System.Exception ex)
             {

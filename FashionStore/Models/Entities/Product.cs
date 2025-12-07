@@ -41,6 +41,14 @@ namespace FashionStore.Models.Entities
         [Display(Name = "Hình ảnh")]
         public string ImageUrl { get; set; }
 
+        [StringLength(255)]
+        [Display(Name = "Hình ảnh chi tiết 1")]
+        public string Detail1 { get; set; }
+
+        [StringLength(255)]
+        [Display(Name = "Hình ảnh chi tiết 2")]
+        public string Detail2 { get; set; }
+
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn kho phải >= 0")]
         [Display(Name = "Tồn kho")]

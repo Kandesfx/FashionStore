@@ -90,15 +90,6 @@
         .search-bar {
             max-width: 400px;
             margin: 0 auto;
-            position: relative;
-            background: transparent;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-        }
-
-        .search-bar.focused {
-            background: #fffacd;
-            padding: 2px;
         }
 
         .search-input {
@@ -107,18 +98,11 @@
             padding: 10px 20px;
             border-radius: 50px 0 0 50px;
             transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        .search-bar.focused .search-input {
-            background: transparent;
-            border-color: transparent;
         }
 
         .search-input:focus {
-            border-color: transparent;
+            border-color: var(--accent-color);
             box-shadow: none;
-            background: transparent;
         }
 
         .search-btn {
@@ -130,147 +114,10 @@
             transition: all 0.3s ease;
         }
 
-        .search-bar.focused .search-btn {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
         .search-btn:hover {
             background: var(--accent-color);
             border-color: var(--accent-color);
             color: white;
-        }
-
-        /* Live Search Dropdown */
-        .search-results-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            margin-top: 5px;
-            max-height: 500px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .search-results-dropdown.show {
-            display: block;
-        }
-
-        .search-suggestions {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-suggestions-title {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        .search-suggestion-item {
-            color: #0066cc;
-            text-decoration: none;
-            display: block;
-            padding: 8px 0;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .search-suggestion-item:hover {
-            color: var(--accent-color);
-            padding-left: 5px;
-        }
-
-        .search-products {
-            padding: 15px 0;
-        }
-
-        .search-products-title {
-            font-size: 13px;
-            color: var(--text-light);
-            margin: 0 20px 15px 20px;
-            font-weight: 500;
-        }
-
-        .search-product-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: var(--text-color);
-            transition: all 0.2s ease;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .search-product-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-product-item:hover {
-            background: var(--bg-light);
-            text-decoration: none;
-            color: var(--text-color);
-        }
-
-        .search-product-image {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .search-product-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .search-product-name {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: var(--text-color);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .search-product-price {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .search-product-price-current {
-            font-size: 16px;
-            font-weight: 700;
-            color: #d32f2f;
-        }
-
-        .search-product-price-old {
-            font-size: 13px;
-            color: var(--text-light);
-            text-decoration: line-through;
-        }
-
-        .search-product-discount {
-            font-size: 12px;
-            color: #d32f2f;
-            font-weight: 500;
-        }
-
-        .search-no-results {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-light);
-            font-size: 14px;
         }
 
         /* Navbar Icons */
@@ -609,29 +456,27 @@
 
             <!-- Search Bar (Desktop) -->
             <div class="search-bar d-none d-lg-flex mx-4">
-                <form class="d-flex w-100" action="@Url.Action("Search", "Product")" method="get" id="searchForm">
-                    <input class="form-control search-input" type="search" name="q" id="searchInput" placeholder="Tìm kiếm sản phẩm..." aria-label="Search" autocomplete="off">
+                <form class="d-flex w-100" action="@Url.Action("Index", "Product")" method="get">
+                    <input class="form-control search-input" type="search" name="search" placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
                     <button class="btn search-btn" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
-                <!-- Search Results Dropdown -->
-                <div class="search-results-dropdown" id="searchResults">
-                    <div class="search-products">
-                        <div class="search-products-title">Sản phẩm gợi ý</div>
-                        <div id="searchProductsList"></div>
-                    </div>
-                </div>
             </div>
 
             <!-- Right Icons -->
             <div class="navbar-icons d-flex align-items-center ms-auto">
+                <!-- Giỏ hàng - Luôn hiển thị -->
+                <a href="@Url.Action("Index", "Cart")" class="icon-link position-relative me-3" title="Giỏ hàng">
+                    <i class="fas fa-shopping-bag"></i>
+                    @if (Session["UserId"] != null)
+                    {
+                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cart-badge">0</span>
+                    }
+                </a>
+
                 @if (Session["UserId"] != null)
                 {
-                    <a href="@Url.Action("Index", "Cart")" class="icon-link position-relative me-3">
-                        <i class="fas fa-shopping-bag"></i>
-                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" id="cart-badge">0</span>
-                    </a>
                     <div class="dropdown">
                         <a class="icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user"></i>
@@ -687,8 +532,8 @@
 
                 <!-- Mobile Search -->
                 <div class="d-lg-none p-3">
-                    <form class="d-flex" action="@Url.Action("Search", "Product")" method="get" id="mobileSearchForm">
-                        <input class="form-control me-2" type="search" name="q" id="mobileSearchInput" placeholder="Tìm kiếm..." aria-label="Search" autocomplete="off">
+                    <form class="d-flex" action="@Url.Action("Index", "Product")" method="get">
+                        <input class="form-control me-2" type="search" name="search" placeholder="Tìm kiếm..." aria-label="Search">
                         <button class="btn btn-outline-dark" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
@@ -802,6 +647,23 @@
             }
         }
 
+        // Load cart count on page load (if user is logged in)
+        @if (Session["UserId"] != null)
+        {
+            <text>
+            (function() {
+                fetch('@Url.Action("GetCartCount", "Cart")')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.count !== undefined) {
+                            updateCartBadge(data.count);
+                        }
+                    })
+                    .catch(error => console.error('Error loading cart count:', error));
+            })();
+            </text>
+        }
+
         // Close mobile menu when clicking outside
         document.addEventListener('click', function (event) {
             const navbar = document.getElementById('mainNav');
@@ -814,147 +676,6 @@
                 }
             }
         });
-
-        // Live Search Functionality
-        (function () {
-            const searchInput = document.getElementById('searchInput');
-            const mobileSearchInput = document.getElementById('mobileSearchInput');
-            const searchResults = document.getElementById('searchResults');
-            const searchProductsList = document.getElementById('searchProductsList');
-            const productDetailsUrl = '@Url.Action("Details", "Product")';
-            let searchTimeout;
-
-            function formatPrice(price) {
-                return new Intl.NumberFormat('vi-VN').format(price) + '₫';
-            }
-
-            function calculateDiscount(price, discountPrice) {
-                if (!discountPrice || discountPrice >= price) return null;
-                const discount = ((price - discountPrice) / price * 100).toFixed(0);
-                return discount > 0 ? discount : null;
-            }
-
-            function renderProductItem(product) {
-                const discount = calculateDiscount(product.price, product.discountPrice);
-                const finalPrice = product.discountPrice || product.price;
-                const imageUrl = product.imageUrl || '/Image/default-product.jpg';
-                const productUrl = productDetailsUrl + '/' + product.id;
-
-                let priceHtml = '<div class="search-product-price-current">' + formatPrice(finalPrice) + '</div>';
-                if (product.discountPrice && product.discountPrice < product.price) {
-                    priceHtml += '<div class="search-product-price-old">' + formatPrice(product.price) + '</div>';
-                    if (discount) {
-                        priceHtml += '<div class="search-product-discount">-' + discount + '%</div>';
-                    }
-                }
-
-                return `
-                    <a href="${productUrl}" class="search-product-item">
-                        <img src="${imageUrl}" alt="${product.productName}" class="search-product-image" onerror="this.src='/Image/default-product.jpg'">
-                        <div class="search-product-info">
-                            <div class="search-product-name">${product.productName}</div>
-                            <div class="search-product-price">
-                                ${priceHtml}
-                            </div>
-                        </div>
-                    </a>
-                `;
-            }
-
-            function performSearch(searchTerm) {
-                if (!searchTerm || searchTerm.trim().length < 2) {
-                    searchResults.classList.remove('show');
-                    return;
-                }
-
-                const searchUrl = '/api/products/search?q=' + encodeURIComponent(searchTerm.trim()) + '&limit=5';
-                console.log('Searching for:', searchTerm.trim(), 'URL:', searchUrl);
-
-                fetch(searchUrl)
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Search results:', data);
-                        if (data.success && data.data && data.data.length > 0) {
-                            searchProductsList.innerHTML = data.data.map(product => renderProductItem(product)).join('');
-                            searchResults.classList.add('show');
-                        } else {
-                            searchProductsList.innerHTML = '<div class="search-no-results">Không tìm thấy sản phẩm nào</div>';
-                            searchResults.classList.add('show');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Search error:', error);
-                        searchProductsList.innerHTML = '<div class="search-no-results">Lỗi khi tìm kiếm. Vui lòng thử lại.</div>';
-                        searchResults.classList.add('show');
-                    });
-            }
-
-            function handleSearchInput(input) {
-                if (!input) return;
-
-                const searchBar = input.closest('.search-bar');
-
-                input.addEventListener('input', function (e) {
-                    const searchTerm = e.target.value.trim();
-                    
-                    clearTimeout(searchTimeout);
-                    
-                    if (searchTerm.length >= 2) {
-                        searchTimeout = setTimeout(() => {
-                            performSearch(searchTerm);
-                        }, 300); // Debounce 300ms
-                    } else {
-                        searchResults.classList.remove('show');
-                    }
-                });
-
-                input.addEventListener('focus', function (e) {
-                    if (searchBar) {
-                        searchBar.classList.add('focused');
-                    }
-                    const searchTerm = e.target.value.trim();
-                    if (searchTerm.length >= 2) {
-                        performSearch(searchTerm);
-                    }
-                });
-
-                input.addEventListener('blur', function (e) {
-                    // Delay to allow click on results
-                    setTimeout(() => {
-                        if (searchBar) {
-                            searchBar.classList.remove('focused');
-                        }
-                    }, 200);
-                });
-
-                // Hide dropdown when clicking outside
-                document.addEventListener('click', function (e) {
-                    if (searchBar && !searchBar.contains(e.target)) {
-                        searchResults.classList.remove('show');
-                        if (searchBar) {
-                            searchBar.classList.remove('focused');
-                        }
-                    }
-                });
-            }
-
-            // Initialize for desktop search
-            if (searchInput) {
-                handleSearchInput(searchInput);
-            }
-
-            // Initialize for mobile search (optional - can add similar functionality)
-            if (mobileSearchInput) {
-                // Mobile search can use the same logic if needed
-                // For now, mobile search will work with form submission
-            }
-        })();
     </script>
 
     @RenderSection("scripts", required: false)
