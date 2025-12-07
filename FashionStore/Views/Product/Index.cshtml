@@ -1,0 +1,82 @@
+@{
+    ViewBag.Title = "Sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <h3>Danh mục</h3>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="@Url.Action("Index", "Product")">Tất cả sản phẩm</a>
+                </li>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <li class="list-group-item @(ViewBag.CurrentCategoryId != null && (int)ViewBag.CurrentCategoryId == category.Id ? "active" : "")">
+                        <a href="@Url.Action("Index", "Product", new { categoryId = category.Id })">@category.CategoryName</a>
+                    </li>
+                }
+            </ul>
+
+            <h3>Sắp xếp</h3>
+            <div class="list-group">
+                <a href="@Url.Action("Index", "Product", new { categoryId = ViewBag.CurrentCategoryId, sortBy = "newest" })" 
+                   class="list-group-item @(ViewBag.SortBy == null || ViewBag.SortBy == "newest" ? "active" : "")">Mới nhất</a>
+                <a href="@Url.Action("Index", "Product", new { categoryId = ViewBag.CurrentCategoryId, sortBy = "price-asc" })" 
+                   class="list-group-item @(ViewBag.SortBy == "price-asc" ? "active" : "")">Giá tăng dần</a>
+                <a href="@Url.Action("Index", "Product", new { categoryId = ViewBag.CurrentCategoryId, sortBy = "price-desc" })" 
+                   class="list-group-item @(ViewBag.SortBy == "price-desc" ? "active" : "")">Giá giảm dần</a>
+                <a href="@Url.Action("Index", "Product", new { categoryId = ViewBag.CurrentCategoryId, sortBy = "name-asc" })" 
+                   class="list-group-item @(ViewBag.SortBy == "name-asc" ? "active" : "")">Tên A-Z</a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <h2>Sản phẩm</h2>
+            <div class="row">
+                @if (ViewBag.Products != null)
+                {
+                    foreach (var product in ViewBag.Products)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h5 class="card-title">@product.ProductName</h5>
+                                    <p class="card-text">
+                                        @if (product.DiscountPrice != null)
+                                        {
+                                            <span style="text-decoration: line-through; color: gray;">@product.Price.ToString("N0") đ</span>
+                                            <span style="color: red; font-weight: bold;">@product.DiscountPrice.ToString("N0") đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@product.Price.ToString("N0") đ</span>
+                                        }
+                                    </p>
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="btn btn-primary">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination">
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", "Product", new { categoryId = ViewBag.CurrentCategoryId, sortBy = ViewBag.SortBy, page = i })">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+

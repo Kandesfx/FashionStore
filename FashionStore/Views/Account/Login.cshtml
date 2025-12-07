@@ -1,0 +1,520 @@
+@model FashionStore.Models.ViewModels.LoginViewModel
+
+@{
+    ViewBag.Title = "Đăng Nhập - Fashion Store";
+    Layout = null; // Full page design, không dùng layout
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+        .form-control:focus {
+            border-color: #403B4A;
+            box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.15);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+        }
+
+        .invalid-feedback, .valid-feedback {
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .input-group-text {
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            color: #403B4A;
+            transition: all 0.3s ease;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .input-group:focus-within .input-group-text {
+            border-color: #403B4A;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 10;
+            background: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .password-toggle:hover {
+            color: #403B4A;
+        }
+
+        .input-group.password-wrapper .form-control {
+            padding-right: 45px;
+        }
+
+        .input-group.password-wrapper .form-control.is-valid,
+        .input-group.password-wrapper .form-control.is-invalid {
+            padding-right: 45px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(64, 59, 74, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 12px;
+        }
+
+        .forgot-password a {
+            color: #403B4A;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #E7E9BB;
+            text-decoration: underline;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .register-link a {
+            color: #403B4A;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: #E7E9BB;
+        }
+
+        .form-check {
+            margin-top: 15px;
+        }
+
+        .form-check-input {
+            margin-top: 0.3em;
+        }
+
+        .form-check-label {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .validation-summary {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 576px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .login-container {
+                max-width: 100%;
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 991px) {
+            .login-container {
+                max-width: 500px;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .login-container {
+                max-width: 480px;
+            }
+        }
+
+        /* Loading animation */
+        .btn-login.loading {
+            pointer-events: none;
+            position: relative;
+        }
+
+        .btn-login.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-login.loading span {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2><i class="fas fa-shopping-bag"></i> Fashion Store</h2>
+                <p>Đăng nhập để tiếp tục mua sắm</p>
+            </div>
+            <div class="login-body">
+                @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm", novalidate = "novalidate" }))
+            {
+                @Html.AntiForgeryToken()
+
+                    if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="validation-summary">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        @Html.LabelFor(m => m.Username, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Nhập tên đăng nhập", required = "required", minlength = "3", maxlength = "50" })
+                        </div>
+                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+                </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                        <div class="input-group password-wrapper">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required", minlength = "6", id = "Password" })
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+
+                    <div class="form-check mb-3">
+                        @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input" })
+                        @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label" })
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#"><i class="fas fa-key"></i> Quên mật khẩu?</a>
+                </div>
+
+                    <button type="submit" class="btn btn-login" id="submitBtn">
+                        <span><i class="fas fa-sign-in-alt"></i> Đăng Nhập</span>
+                    </button>
+
+                    <div class="register-link">
+                        Chưa có tài khoản? <a href="@Url.Action("Register", "Account")"><i class="fas fa-user-plus"></i> Đăng ký ngay</a>
+                </div>
+            }
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('Username');
+            const passwordInput = document.getElementById('Password');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Validation rules
+            const validationRules = {
+                username: {
+                    required: 'Vui lòng nhập tên đăng nhập',
+                    minLength: 'Tên đăng nhập phải có ít nhất 3 ký tự',
+                    maxLength: 'Tên đăng nhập không được quá 50 ký tự',
+                    pattern: 'Tên đăng nhập chỉ chứa chữ cái, số và dấu gạch dưới'
+                },
+                password: {
+                    required: 'Vui lòng nhập mật khẩu',
+                    minLength: 'Mật khẩu phải có ít nhất 6 ký tự'
+                }
+            };
+
+            // Validate username
+            function validateUsername(value) {
+                if (!value || !value.trim()) {
+                    return validationRules.username.required;
+                }
+                if (value.length < 3) {
+                    return validationRules.username.minLength;
+                }
+                if (value.length > 50) {
+                    return validationRules.username.maxLength;
+                }
+                if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                    return validationRules.username.pattern;
+                }
+                return null;
+            }
+
+            // Validate password
+            function validatePassword(value) {
+                if (!value) {
+                    return validationRules.password.required;
+                }
+                if (value.length < 6) {
+                    return validationRules.password.minLength;
+                }
+                return null;
+            }
+
+            // Show validation feedback (chỉ hiển thị lỗi, không hiển thị màu xanh)
+            function showFeedback(input, error) {
+                const feedbackEl = input.closest('.mb-4, .mb-3').querySelector('.text-danger') || 
+                                 input.parentElement.nextElementSibling;
+                
+                if (error) {
+                    // Chỉ hiển thị màu đỏ khi có lỗi
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                    if (feedbackEl && feedbackEl.classList.contains('text-danger')) {
+                        feedbackEl.textContent = error;
+                        feedbackEl.style.display = 'block';
+                    }
+                } else {
+                    // Không thêm is-valid, chỉ xóa is-invalid và ẩn error message
+                    input.classList.remove('is-invalid', 'is-valid');
+                    if (feedbackEl && feedbackEl.classList.contains('text-danger')) {
+                        feedbackEl.style.display = 'none';
+                    }
+                }
+            }
+
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Form submission - chỉ validate khi submit
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const usernameError = usernameInput ? validateUsername(usernameInput.value) : null;
+                    const passwordError = passwordInput ? validatePassword(passwordInput.value) : null;
+
+                    if (usernameInput) showFeedback(usernameInput, usernameError);
+                    if (passwordInput) showFeedback(passwordInput, passwordError);
+
+                    if (usernameError || passwordError) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // Add loading state
+                    if (submitBtn) {
+                        submitBtn.classList.add('loading');
+                    }
+                });
+            }
+
+            // Xử lý validation từ server khi page load
+            // ASP.NET MVC sẽ tự động thêm class validation, nhưng đảm bảo không có is-valid
+            if (usernameInput) {
+                // Xóa is-valid nếu có (chỉ giữ is-invalid nếu có lỗi từ server)
+                if (usernameInput.classList.contains('is-valid')) {
+                    usernameInput.classList.remove('is-valid');
+                }
+                
+                usernameInput.addEventListener('focus', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    const feedbackEl = this.closest('.mb-4, .mb-3').querySelector('.text-danger');
+                    if (feedbackEl) {
+                        feedbackEl.style.display = 'none';
+                    }
+                });
+            }
+
+            if (passwordInput) {
+                // Xóa is-valid nếu có (chỉ giữ is-invalid nếu có lỗi từ server)
+                if (passwordInput.classList.contains('is-valid')) {
+                    passwordInput.classList.remove('is-valid');
+                }
+                
+                passwordInput.addEventListener('focus', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    const feedbackEl = this.closest('.mb-4, .mb-3').querySelector('.text-danger');
+                    if (feedbackEl) {
+                        feedbackEl.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

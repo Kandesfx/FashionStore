@@ -1,0 +1,94 @@
+@model FashionStore.Models.Entities.Product
+
+@{
+    ViewBag.Title = Model.ProductName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Model.ImageUrl" class="img-fluid" alt="@Model.ProductName" style="max-height: 500px;">
+        </div>
+        <div class="col-md-6">
+            <h2>@Model.ProductName</h2>
+            <p class="text-muted">@Model.Category.CategoryName</p>
+            <hr>
+            <div class="mb-3">
+                @if (Model.DiscountPrice.HasValue)
+                {
+                    <h3 class="text-danger">@Model.DiscountPrice.Value.ToString("N0") đ</h3>
+                    <p class="text-muted"><del>@Model.Price.ToString("N0") đ</del></p>
+                }
+                else
+                {
+                    <h3>@Model.Price.ToString("N0") đ</h3>
+                }
+            </div>
+            <p><strong>Tồn kho:</strong> @Model.Stock sản phẩm</p>
+            <p>@Model.Description</p>
+            <hr>
+            <div class="mb-3">
+                <label>Số lượng:</label>
+                <input type="number" id="quantity" value="1" min="1" max="@Model.Stock" class="form-control" style="width: 100px; display: inline-block;">
+            </div>
+            <button class="btn btn-primary btn-lg" onclick="addToCart(@Model.Id)">Thêm vào giỏ hàng</button>
+        </div>
+    </div>
+
+    @if (ViewBag.RelatedProducts != null && ((System.Collections.Generic.List<FashionStore.Models.Entities.Product>)ViewBag.RelatedProducts).Any())
+    {
+        <hr class="my-5">
+        <h3>Sản phẩm liên quan</h3>
+        <div class="row">
+            @foreach (var product in ViewBag.RelatedProducts)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <img src="@product.ImageUrl" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">@product.ProductName</h5>
+                            <p class="card-text">
+                                @if (product.DiscountPrice.HasValue)
+                                {
+                                    <span style="text-decoration: line-through; color: gray;">@product.Price.ToString("N0") đ</span>
+                                    <span style="color: red; font-weight: bold;">@product.DiscountPrice.Value.ToString("N0") đ</span>
+                                }
+                                else
+                                {
+                                    <span>@product.Price.ToString("N0") đ</span>
+                                }
+                            </p>
+                            <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="btn btn-primary">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+function addToCart(productId) {
+    var quantity = parseInt(document.getElementById('quantity').value);
+    $.ajax({
+        url: '/Cart/AddToCart',
+        type: 'POST',
+        data: {
+            productId: productId,
+            quantity: quantity
+        },
+        success: function(response) {
+            if (response.success) {
+                alert('Đã thêm vào giỏ hàng!');
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function() {
+            alert('Có lỗi xảy ra');
+        }
+    });
+}
+</script>
+

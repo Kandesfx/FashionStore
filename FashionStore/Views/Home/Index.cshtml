@@ -1,0 +1,78 @@
+@{
+    ViewBag.Title = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="jumbotron">
+    <h1>FashionStore</h1>
+    <p class="lead">Cửa hàng thời trang trực tuyến hàng đầu</p>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Sản phẩm nổi bật</h2>
+        <div class="row">
+            @if (ViewBag.FeaturedProducts != null)
+            {
+                foreach (var product in ViewBag.FeaturedProducts)
+                {
+                    <div class="col-md-3">
+                        <div class="thumbnail">
+                            <img src="@product.ImageUrl" alt="@product.ProductName" style="height: 200px; width: 100%; object-fit: cover;">
+                            <div class="caption">
+                                <h4>@product.ProductName</h4>
+                                <p>
+                                    @if (product.DiscountPrice != null && product.DiscountPrice > 0)
+                                    {
+                                        <span style="text-decoration: line-through; color: gray;">@product.Price.ToString("N0") đ</span>
+                                        <span style="color: red; font-weight: bold;">@product.DiscountPrice.ToString("N0") đ</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@product.Price.ToString("N0") đ</span>
+                                    }
+                                </p>
+                                <p>@Html.ActionLink("Xem chi tiết", "Details", "Product", new { id = product.Id }, new { @class = "btn btn-primary" })</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Sản phẩm mới nhất</h2>
+        <div class="row">
+            @if (ViewBag.LatestProducts != null)
+            {
+                foreach (var product in ViewBag.LatestProducts)
+                {
+                    <div class="col-md-3">
+                        <div class="thumbnail">
+                            <img src="@product.ImageUrl" alt="@product.ProductName" style="height: 200px; width: 100%; object-fit: cover;">
+                            <div class="caption">
+                                <h4>@product.ProductName</h4>
+                                <p>
+                                    @if (product.DiscountPrice != null && product.DiscountPrice > 0)
+                                    {
+                                        <span style="text-decoration: line-through; color: gray;">@product.Price.ToString("N0") đ</span>
+                                        <span style="color: red; font-weight: bold;">@product.DiscountPrice.ToString("N0") đ</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@product.Price.ToString("N0") đ</span>
+                                    }
+                                </p>
+                                <p>@Html.ActionLink("Xem chi tiết", "Details", "Product", new { id = product.Id }, new { @class = "btn btn-primary" })</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+

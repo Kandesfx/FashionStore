@@ -1,0 +1,121 @@
+@model FashionStore.Models.ViewModels.CartViewModel
+
+@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Giỏ hàng của bạn</h2>
+    <hr>
+
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <div class="alert alert-info">
+            <p>Giỏ hàng của bạn đang trống.</p>
+            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td><img src="@item.ImageUrl" alt="@item.ProductName" style="width: 80px; height: 80px; object-fit: cover;"></td>
+                        <td>@item.ProductName</td>
+                        <td>
+                            @if (item.DiscountPrice.HasValue)
+                            {
+                                <span style="text-decoration: line-through; color: gray;">@item.Price.ToString("N0") đ</span><br>
+                                <span style="color: red; font-weight: bold;">@item.DiscountPrice.Value.ToString("N0") đ</span>
+                            }
+                            else
+                            {
+                                <span>@item.Price.ToString("N0") đ</span>
+                            }
+                        </td>
+                        <td>
+                            <input type="number" class="form-control quantity-input" data-cart-item-id="@item.Id" 
+                                   value="@item.Quantity" min="1" max="@item.Stock" style="width: 80px;">
+                        </td>
+                        <td>@item.SubTotal.ToString("N0") đ</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm remove-item" data-cart-item-id="@item.Id">Xóa</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Tổng cộng:</strong></td>
+                    <td><strong>@Model.TotalAmount.ToString("N0") đ</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="text-right mt-3">
+            <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">Tiếp tục mua sắm</a>
+            <a href="@Url.Action("Checkout", "Order")" class="btn btn-primary">Thanh toán</a>
+        </div>
+    }
+</div>
+
+<script>
+$(document).ready(function() {
+    $('.quantity-input').on('change', function() {
+        var cartItemId = $(this).data('cart-item-id');
+        var quantity = $(this).val();
+        
+        $.ajax({
+            url: '/Cart/UpdateCartItem',
+            type: 'POST',
+            data: {
+                cartItemId: cartItemId,
+                quantity: quantity
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    $('.remove-item').on('click', function() {
+        var cartItemId = $(this).data('cart-item-id');
+        
+        if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+            $.ajax({
+                url: '/Cart/RemoveCartItem',
+                type: 'POST',
+                data: {
+                    cartItemId: cartItemId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+

@@ -1,0 +1,105 @@
+@{
+    ViewBag.Title = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Quản lý đơn hàng</h2>
+    <hr>
+
+    <div class="mb-3">
+        <a href="@Url.Action("Index", "AdminOrder", new { status = (string)null })" class="btn btn-sm @(ViewBag.CurrentStatus == null ? "btn-primary" : "btn-outline-primary")">Tất cả</a>
+        <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Pending" ? "btn-primary" : "btn-outline-primary")">Chờ xử lý</a>
+        <a href="@Url.Action("Index", "AdminOrder", new { status = "Processing" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Processing" ? "btn-primary" : "btn-outline-primary")">Đang xử lý</a>
+        <a href="@Url.Action("Index", "AdminOrder", new { status = "Shipped" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Shipped" ? "btn-primary" : "btn-outline-primary")">Đã giao hàng</a>
+        <a href="@Url.Action("Index", "AdminOrder", new { status = "Delivered" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Delivered" ? "btn-primary" : "btn-outline-primary")">Đã nhận hàng</a>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Người đặt</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.Orders != null)
+            {
+                foreach (var order in ViewBag.Orders)
+                {
+                    <tr>
+                        <td>#@order.Id</td>
+                        <td>@order.User.FullName (@order.User.Username)</td>
+                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@order.TotalAmount.ToString("N0") đ</td>
+                        <td>
+                            <select class="form-control status-select" data-order-id="@order.Id" style="width: auto; display: inline-block;">
+                                <option value="Pending" @(order.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                                <option value="Processing" @(order.Status == "Processing" ? "selected" : "")>Đang xử lý</option>
+                                <option value="Shipped" @(order.Status == "Shipped" ? "selected" : "")>Đã giao hàng</option>
+                                <option value="Delivered" @(order.Status == "Delivered" ? "selected" : "")>Đã nhận hàng</option>
+                                <option value="Cancelled" @(order.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
+                            </select>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("Details", "AdminOrder", new { id = order.Id })" class="btn btn-sm btn-primary">Chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "AdminOrder", new { status = ViewBag.CurrentStatus, page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<script>
+$(document).ready(function() {
+    $('.status-select').on('change', function() {
+        var orderId = $(this).data('order-id');
+        var status = $(this).val();
+        
+        if (confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng?')) {
+            $.ajax({
+                url: '/Admin/AdminOrder/UpdateStatus',
+                type: 'POST',
+                data: {
+                    orderId: orderId,
+                    status: status
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Cập nhật trạng thái thành công');
+                    } else {
+                        alert(response.message);
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra');
+                    location.reload();
+                }
+            });
+        } else {
+            location.reload();
+        }
+    });
+});
+</script>
+
