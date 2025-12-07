@@ -1,0 +1,70 @@
+@model IEnumerable<FashionStore.Models.Entities.Order>
+
+@{
+    ViewBag.Title = "Đơn hàng của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Đơn hàng của tôi</h2>
+    <hr>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>Bạn chưa có đơn hàng nào.</p>
+            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>#@order.Id</td>
+                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@order.TotalAmount.ToString("N0") đ</td>
+                        <td>
+                            @switch (order.Status)
+                            {
+                                case "Pending":
+                                    <span class="badge badge-warning">Chờ xử lý</span>
+                                    break;
+                                case "Processing":
+                                    <span class="badge badge-info">Đang xử lý</span>
+                                    break;
+                                case "Shipped":
+                                    <span class="badge badge-primary">Đã giao hàng</span>
+                                    break;
+                                case "Delivered":
+                                    <span class="badge badge-success">Đã nhận hàng</span>
+                                    break;
+                                case "Cancelled":
+                                    <span class="badge badge-danger">Đã hủy</span>
+                                    break;
+                                default:
+                                    <span class="badge">@order.Status</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            <a href="@Url.Action("Details", "Order", new { id = order.Id })" class="btn btn-sm btn-primary">Xem chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+

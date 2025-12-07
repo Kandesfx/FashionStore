@@ -1,0 +1,49 @@
+@model FashionStore.Models.Entities.Product
+
+@{
+    ViewBag.Title = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Chi tiết sản phẩm</h2>
+    <hr>
+
+    <dl class="dl-horizontal">
+        <dt>ID:</dt>
+        <dd>@Model.Id</dd>
+
+        <dt>Tên sản phẩm:</dt>
+        <dd>@Model.ProductName</dd>
+
+        <dt>Mô tả:</dt>
+        <dd>@Model.Description</dd>
+
+        <dt>Giá:</dt>
+        <dd>@Model.Price.ToString("N0") đ</dd>
+
+        <dt>Giá khuyến mãi:</dt>
+        <dd>@(Model.DiscountPrice?.ToString("N0") + " đ" ?? "Không có")</dd>
+
+        <dt>Danh mục:</dt>
+        <dd>@Model.Category.CategoryName</dd>
+
+        <dt>Tồn kho:</dt>
+        <dd>@Model.Stock</dd>
+
+        <dt>Sản phẩm nổi bật:</dt>
+        <dd>@(Model.Featured ? "Có" : "Không")</dd>
+
+        <dt>Trạng thái:</dt>
+        <dd>@(Model.IsActive ? "Kích hoạt" : "Tắt")</dd>
+
+        <dt>Ngày tạo:</dt>
+        <dd>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+    </dl>
+
+    <div class="mt-3">
+        <a href="@Url.Action("Edit", "AdminProduct", new { id = Model.Id })" class="btn btn-warning">Sửa</a>
+        <a href="@Url.Action("Index", "AdminProduct")" class="btn btn-secondary">Quay lại</a>
+    </div>
+</div>
+

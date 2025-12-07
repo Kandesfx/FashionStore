@@ -1,0 +1,41 @@
+@model FashionStore.Models.Entities.User
+
+@{
+    ViewBag.Title = "Xóa người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Xóa người dùng</h2>
+    <hr>
+
+    <div class="alert alert-warning">
+        <p>Bạn có chắc muốn vô hiệu hóa người dùng này? Người dùng sẽ được đánh dấu là không kích hoạt thay vì xóa hoàn toàn.</p>
+    </div>
+
+    <dl class="dl-horizontal">
+        <dt>Username:</dt>
+        <dd>@Model.Username</dd>
+
+        <dt>Email:</dt>
+        <dd>@Model.Email</dd>
+
+        <dt>Họ tên:</dt>
+        <dd>@Model.FullName</dd>
+
+        <dt>Vai trò:</dt>
+        <dd>@Model.Role.RoleName</dd>
+    </dl>
+
+    @using (Html.BeginForm("Delete", "AdminUser", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="form-group">
+            <input type="submit" value="Xóa" class="btn btn-danger" />
+            <a href="@Url.Action("Index", "AdminUser")" class="btn btn-secondary">Hủy</a>
+        </div>
+    }
+</div>
+
