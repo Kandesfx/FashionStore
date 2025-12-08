@@ -31,7 +31,7 @@ namespace FashionStore.Controllers.Admin
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)System.Math.Ceiling(totalCount / (double)pageSize);
             
-            return View();
+            return View("~/Views/Admin/Product/Index.cshtml");
         }
 
         // GET: Admin/Product/Details/5
@@ -42,14 +42,14 @@ namespace FashionStore.Controllers.Admin
             {
                 return HttpNotFound();
             }
-            return View(product);
+            return View("~/Views/Admin/Product/Details.cshtml", product);
         }
 
         // GET: Admin/Product/Create
         public ActionResult Create()
         {
             ViewBag.Categories = _categoryService.GetActiveCategories();
-            return View();
+            return View("~/Views/Admin/Product/Create.cshtml");
         }
 
         // POST: Admin/Product/Create
@@ -60,7 +60,7 @@ namespace FashionStore.Controllers.Admin
             if (!ModelState.IsValid)
             {
                 ViewBag.Categories = _categoryService.GetActiveCategories();
-                return View(model);
+                return View("~/Views/Admin/Product/Create.cshtml", model);
             }
 
             try
@@ -86,7 +86,7 @@ namespace FashionStore.Controllers.Admin
             {
                 ModelState.AddModelError("", ex.Message);
                 ViewBag.Categories = _categoryService.GetActiveCategories();
-                return View(model);
+                return View("~/Views/Admin/Product/Create.cshtml", model);
             }
         }
 
@@ -114,7 +114,7 @@ namespace FashionStore.Controllers.Admin
             };
 
             ViewBag.Categories = _categoryService.GetActiveCategories();
-            return View(model);
+            return View("~/Views/Admin/Product/Edit.cshtml", model);
         }
 
         // POST: Admin/Product/Edit/5
@@ -125,7 +125,7 @@ namespace FashionStore.Controllers.Admin
             if (!ModelState.IsValid)
             {
                 ViewBag.Categories = _categoryService.GetActiveCategories();
-                return View(model);
+                return View("~/Views/Admin/Product/Edit.cshtml", model);
             }
 
             try
@@ -153,7 +153,7 @@ namespace FashionStore.Controllers.Admin
             {
                 ModelState.AddModelError("", ex.Message);
                 ViewBag.Categories = _categoryService.GetActiveCategories();
-                return View(model);
+                return View("~/Views/Admin/Product/Edit.cshtml", model);
             }
         }
 
@@ -165,7 +165,7 @@ namespace FashionStore.Controllers.Admin
             {
                 return HttpNotFound();
             }
-            return View(product);
+            return View("~/Views/Admin/Product/Delete.cshtml", product);
         }
 
         // POST: Admin/Product/Delete/5
@@ -182,7 +182,7 @@ namespace FashionStore.Controllers.Admin
             {
                 ModelState.AddModelError("", ex.Message);
                 var product = _productService.GetById(id);
-                return View(product);
+                return View("~/Views/Admin/Product/Delete.cshtml", product);
             }
         }
     }

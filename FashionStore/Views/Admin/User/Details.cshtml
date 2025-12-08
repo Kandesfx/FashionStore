@@ -2,45 +2,112 @@
 
 @{
     ViewBag.Title = "Chi tiết người dùng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Chi tiết người dùng</h2>
-    <hr>
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-user-circle me-2"></i>Chi tiết người dùng #@Model.Id
+        </h5>
+        <div class="action-buttons">
+            <a href="@Url.Action("Edit", "AdminUser", new { id = Model.Id })" class="btn btn-sm btn-warning">
+                <i class="fas fa-edit me-1"></i>Sửa
+            </a>
+            <a href="@Url.Action("Index", "AdminUser")" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
 
-    <dl class="dl-horizontal">
-        <dt>ID:</dt>
-        <dd>@Model.Id</dd>
+    <div class="p-4">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Username:</strong>
+                    <p class="mb-0">@Model.Username</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Email:</strong>
+                    <p class="mb-0">@Model.Email</p>
+                </div>
+            </div>
+        </div>
 
-        <dt>Username:</dt>
-        <dd>@Model.Username</dd>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Họ tên:</strong>
+                    <p class="mb-0">@Model.FullName</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Điện thoại:</strong>
+                    <p class="mb-0">@(Model.Phone ?? "N/A")</p>
+                </div>
+            </div>
+        </div>
 
-        <dt>Email:</dt>
-        <dd>@Model.Email</dd>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <strong>Địa chỉ:</strong>
+                    <p class="mb-0">@(Model.Address ?? "N/A")</p>
+                </div>
+            </div>
+        </div>
 
-        <dt>Họ tên:</dt>
-        <dd>@Model.FullName</dd>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Vai trò:</strong>
+                    <p class="mb-0">
+                        @if (Model.Role != null)
+                        {
+                            @if (Model.Role.RoleName == "Admin")
+                            {
+                                <span class="badge badge-danger">@Model.Role.RoleName</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-info">@Model.Role.RoleName</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">N/A</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Trạng thái:</strong>
+                    <p class="mb-0">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">Kích hoạt</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Tắt</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        <dt>Điện thoại:</dt>
-        <dd>@Model.Phone</dd>
-
-        <dt>Địa chỉ:</dt>
-        <dd>@Model.Address</dd>
-
-        <dt>Vai trò:</dt>
-        <dd>@Model.Role.RoleName</dd>
-
-        <dt>Trạng thái:</dt>
-        <dd>@(Model.IsActive ? "Kích hoạt" : "Tắt")</dd>
-
-        <dt>Ngày tạo:</dt>
-        <dd>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
-    </dl>
-
-    <div class="mt-3">
-        <a href="@Url.Action("Edit", "AdminUser", new { id = Model.Id })" class="btn btn-warning">Sửa</a>
-        <a href="@Url.Action("Index", "AdminUser")" class="btn btn-secondary">Quay lại</a>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Ngày tạo:</strong>
+                    <p class="mb-0">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

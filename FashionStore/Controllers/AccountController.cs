@@ -120,7 +120,7 @@ namespace FashionStore.Controllers
 
         // GET: Account/Profile
         [AuthorizeRole("User", "Admin")]
-        public ActionResult UserProfile()
+        public ActionResult Profile()
         {
             var userId = (int)Session["UserId"];
             var user = _userService.GetById(userId);
@@ -141,7 +141,7 @@ namespace FashionStore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRole("User", "Admin")]
-        public ActionResult UserProfile(UserProfileViewModel model)
+        public ActionResult Profile(UserProfileViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -165,6 +165,13 @@ namespace FashionStore.Controllers
             }
 
             return View(model);
+        }
+
+        // GET: Account/UserProfile (alias for Profile)
+        [AuthorizeRole("User", "Admin")]
+        public ActionResult UserProfile()
+        {
+            return Profile();
         }
     }
 }

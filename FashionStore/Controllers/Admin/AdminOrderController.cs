@@ -32,7 +32,7 @@ namespace FashionStore.Controllers.Admin
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)System.Math.Ceiling(totalCount / (double)pageSize);
 
-            return View();
+            return View("~/Views/Admin/Order/Index.cshtml");
         }
 
         // GET: Admin/Order/Details/5
@@ -43,7 +43,7 @@ namespace FashionStore.Controllers.Admin
             {
                 return HttpNotFound();
             }
-            return View(order);
+            return View("~/Views/Admin/Order/Details.cshtml", order);
         }
 
         // POST: Admin/Order/UpdateStatus

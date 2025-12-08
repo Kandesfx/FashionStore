@@ -30,7 +30,7 @@ namespace FashionStore.Controllers.Admin
             ViewBag.TotalProducts = _productService.GetActiveProducts().Count();
             ViewBag.TotalUsers = _userService.GetAll().Count();
             
-            return View();
+            return View("~/Views/Admin/Dashboard/Index.cshtml");
         }
     }
 }

@@ -1,63 +1,99 @@
 @{
     ViewBag.Title = "Quản lý đơn hàng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Quản lý đơn hàng</h2>
-    <hr>
-
-    <div class="mb-3">
-        <a href="@Url.Action("Index", "AdminOrder", new { status = (string)null })" class="btn btn-sm @(ViewBag.CurrentStatus == null ? "btn-primary" : "btn-outline-primary")">Tất cả</a>
-        <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Pending" ? "btn-primary" : "btn-outline-primary")">Chờ xử lý</a>
-        <a href="@Url.Action("Index", "AdminOrder", new { status = "Processing" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Processing" ? "btn-primary" : "btn-outline-primary")">Đang xử lý</a>
-        <a href="@Url.Action("Index", "AdminOrder", new { status = "Shipped" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Shipped" ? "btn-primary" : "btn-outline-primary")">Đã giao hàng</a>
-        <a href="@Url.Action("Index", "AdminOrder", new { status = "Delivered" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Delivered" ? "btn-primary" : "btn-outline-primary")">Đã nhận hàng</a>
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-shopping-cart me-2"></i>Danh sách đơn hàng
+        </h5>
     </div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Mã đơn</th>
-                <th>Người đặt</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (ViewBag.Orders != null)
-            {
-                foreach (var order in ViewBag.Orders)
-                {
-                    <tr>
-                        <td>#@order.Id</td>
-                        <td>@order.User.FullName (@order.User.Username)</td>
-                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@order.TotalAmount.ToString("N0") đ</td>
-                        <td>
-                            <select class="form-control status-select" data-order-id="@order.Id" style="width: auto; display: inline-block;">
-                                <option value="Pending" @(order.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
-                                <option value="Processing" @(order.Status == "Processing" ? "selected" : "")>Đang xử lý</option>
-                                <option value="Shipped" @(order.Status == "Shipped" ? "selected" : "")>Đã giao hàng</option>
-                                <option value="Delivered" @(order.Status == "Delivered" ? "selected" : "")>Đã nhận hàng</option>
-                                <option value="Cancelled" @(order.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <a href="@Url.Action("Details", "AdminOrder", new { id = order.Id })" class="btn btn-sm btn-primary">Chi tiết</a>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+    <div class="mb-3 p-3" style="background: #f8f9fa; border-radius: 6px;">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="@Url.Action("Index", "AdminOrder", new { status = (string)null })" class="btn btn-sm @(ViewBag.CurrentStatus == null ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-list me-1"></i>Tất cả
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Pending" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Pending" ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-clock me-1"></i>Chờ xử lý
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Processing" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Processing" ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-cog me-1"></i>Đang xử lý
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Shipped" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Shipped" ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-truck me-1"></i>Đã giao hàng
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Delivered" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Delivered" ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-check-circle me-1"></i>Đã nhận hàng
+            </a>
+            <a href="@Url.Action("Index", "AdminOrder", new { status = "Cancelled" })" class="btn btn-sm @(ViewBag.CurrentStatus == "Cancelled" ? "btn-primary" : "btn-outline-primary")">
+                <i class="fas fa-times-circle me-1"></i>Đã hủy
+            </a>
+        </div>
+    </div>
 
-    @if (ViewBag.TotalPages > 1)
+    @if (ViewBag.Orders != null)
     {
-        <nav>
-            <ul class="pagination">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Người đặt</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in ViewBag.Orders)
+                    {
+                        <tr>
+                            <td><strong>#@order.Id</strong></td>
+                            <td>
+                                <div>
+                                    <strong>@(order.User?.FullName ?? "N/A")</strong>
+                                    <br />
+                                    <small class="text-muted">@(order.User?.Username ?? "")</small>
+                                </div>
+                            </td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong>@order.TotalAmount.ToString("N0") đ</strong></td>
+                            <td>
+                                <select class="form-select form-select-sm status-select" data-order-id="@order.Id" style="min-width: 150px;">
+                                    <option value="Pending" @(order.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                                    <option value="Processing" @(order.Status == "Processing" ? "selected" : "")>Đang xử lý</option>
+                                    <option value="Shipped" @(order.Status == "Shipped" ? "selected" : "")>Đã giao hàng</option>
+                                    <option value="Delivered" @(order.Status == "Delivered" ? "selected" : "")>Đã nhận hàng</option>
+                                    <option value="Cancelled" @(order.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
+                                </select>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "AdminOrder", new { id = order.Id })" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-shopping-cart"></i>
+            <h4>Chưa có đơn hàng nào</h4>
+            <p>Hiện tại chưa có đơn hàng nào trong hệ thống.</p>
+        </div>
+    }
+
+    @if (ViewBag.TotalPages != null && ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
                 @for (int i = 1; i <= ViewBag.TotalPages; i++)
                 {
                     <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
@@ -69,15 +105,19 @@
     }
 </div>
 
+@section scripts {
 <script>
 $(document).ready(function() {
     $('.status-select').on('change', function() {
         var orderId = $(this).data('order-id');
         var status = $(this).val();
+        var selectElement = $(this);
         
-        if (confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng?')) {
+        if (confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng #' + orderId + '?')) {
+            selectElement.prop('disabled', true);
+            
             $.ajax({
-                url: '/Admin/AdminOrder/UpdateStatus',
+                url: '@Url.Action("UpdateStatus", "AdminOrder")',
                 type: 'POST',
                 data: {
                     orderId: orderId,
@@ -85,21 +125,36 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert('Cập nhật trạng thái thành công');
+                        // Show success message
+                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                            '<i class="fas fa-check-circle me-2"></i>Cập nhật trạng thái thành công' +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                            '</div>';
+                        $('.admin-content').prepend(alertHtml);
+                        
+                        // Auto-hide after 3 seconds
+                        setTimeout(function() {
+                            $('.alert-success').fadeOut();
+                        }, 3000);
                     } else {
-                        alert(response.message);
+                        alert('Lỗi: ' + response.message);
                         location.reload();
                     }
                 },
                 error: function() {
-                    alert('Có lỗi xảy ra');
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái');
                     location.reload();
+                },
+                complete: function() {
+                    selectElement.prop('disabled', false);
                 }
             });
         } else {
+            // Reset to previous value if cancelled
             location.reload();
         }
     });
 });
 </script>
+}
 

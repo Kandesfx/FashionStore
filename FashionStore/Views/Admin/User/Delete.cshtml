@@ -2,40 +2,85 @@
 
 @{
     ViewBag.Title = "Xóa người dùng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Xóa người dùng</h2>
-    <hr>
-
-    <div class="alert alert-warning">
-        <p>Bạn có chắc muốn vô hiệu hóa người dùng này? Người dùng sẽ được đánh dấu là không kích hoạt thay vì xóa hoàn toàn.</p>
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-user-times me-2"></i>Vô hiệu hóa người dùng
+        </h5>
+        <a href="@Url.Action("Index", "AdminUser")" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
     </div>
 
-    <dl class="dl-horizontal">
-        <dt>Username:</dt>
-        <dd>@Model.Username</dd>
-
-        <dt>Email:</dt>
-        <dd>@Model.Email</dd>
-
-        <dt>Họ tên:</dt>
-        <dd>@Model.FullName</dd>
-
-        <dt>Vai trò:</dt>
-        <dd>@Model.Role.RoleName</dd>
-    </dl>
-
-    @using (Html.BeginForm("Delete", "AdminUser", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.Id)
-
-        <div class="form-group">
-            <input type="submit" value="Xóa" class="btn btn-danger" />
-            <a href="@Url.Action("Index", "AdminUser")" class="btn btn-secondary">Hủy</a>
+    <div class="p-4">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Cảnh báo:</strong> Bạn có chắc muốn vô hiệu hóa người dùng này? Người dùng sẽ được đánh dấu là không kích hoạt thay vì xóa hoàn toàn.
         </div>
-    }
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Username:</strong>
+                    <p class="mb-0">@Model.Username</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Email:</strong>
+                    <p class="mb-0">@Model.Email</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Họ tên:</strong>
+                    <p class="mb-0">@Model.FullName</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Vai trò:</strong>
+                    <p class="mb-0">
+                        @if (Model.Role != null)
+                        {
+                            @if (Model.Role.RoleName == "Admin")
+                            {
+                                <span class="badge badge-danger">@Model.Role.RoleName</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-info">@Model.Role.RoleName</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">N/A</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("DeleteConfirmed", "AdminUser", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("id", Model.Id)
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn vô hiệu hóa người dùng này?');">
+                    <i class="fas fa-user-slash me-1"></i>Xác nhận vô hiệu hóa
+                </button>
+                <a href="@Url.Action("Index", "AdminUser")" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </a>
+            </div>
+        }
+    </div>
 </div>
 

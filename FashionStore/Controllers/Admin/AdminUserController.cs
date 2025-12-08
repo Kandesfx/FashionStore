@@ -33,7 +33,7 @@ namespace FashionStore.Controllers.Admin
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)System.Math.Ceiling(totalCount / (double)pageSize);
 
-            return View();
+            return View("~/Views/Admin/User/Index.cshtml");
         }
 
         // GET: Admin/User/Details/5
@@ -44,7 +44,7 @@ namespace FashionStore.Controllers.Admin
             {
                 return HttpNotFound();
             }
-            return View(user);
+            return View("~/Views/Admin/User/Details.cshtml", user);
         }
 
         // GET: Admin/User/Edit/5
@@ -56,7 +56,7 @@ namespace FashionStore.Controllers.Admin
                 return HttpNotFound();
             }
             ViewBag.Roles = _roleRepository.GetAll();
-            return View(user);
+            return View("~/Views/Admin/User/Edit.cshtml", user);
         }
 
         // POST: Admin/User/Edit/5
@@ -66,7 +66,8 @@ namespace FashionStore.Controllers.Admin
         {
             if (!ModelState.IsValid)
             {
-                return View(user);
+                ViewBag.Roles = _roleRepository.GetAll();
+                return View("~/Views/Admin/User/Edit.cshtml", user);
             }
 
             try
@@ -90,7 +91,8 @@ namespace FashionStore.Controllers.Admin
             catch (System.Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(user);
+                ViewBag.Roles = _roleRepository.GetAll();
+                return View("~/Views/Admin/User/Edit.cshtml", user);
             }
         }
 
@@ -102,7 +104,7 @@ namespace FashionStore.Controllers.Admin
             {
                 return HttpNotFound();
             }
-            return View(user);
+            return View("~/Views/Admin/User/Delete.cshtml", user);
         }
 
         // POST: Admin/User/Delete/5
@@ -124,7 +126,7 @@ namespace FashionStore.Controllers.Admin
             {
                 ModelState.AddModelError("", ex.Message);
                 var user = _userService.GetById(id);
-                return View(user);
+                return View("~/Views/Admin/User/Delete.cshtml", user);
             }
         }
     }

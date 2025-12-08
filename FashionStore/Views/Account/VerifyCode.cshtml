@@ -1,0 +1,364 @@
+@model FashionStore.Models.ViewModels.VerifyCodeViewModel
+
+@{
+    ViewBag.Title = "Xác Nhận Mã - Fashion Store";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .forgot-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .forgot-header {
+            background: linear-gradient(135deg, #403B4A 0%, #5a5463 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .forgot-header i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .forgot-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .forgot-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .forgot-body {
+            padding: 40px 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #403B4A;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: block;
+        }
+
+        .code-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .code-input:focus {
+            border-color: #403B4A;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.1);
+        }
+
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #403B4A 0%, #5a5463 100%);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(64, 59, 74, 0.4);
+        }
+
+        .btn-secondary-custom {
+            background: transparent;
+            color: #403B4A;
+            border: 2px solid #403B4A;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #403B4A;
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .button-group .btn-custom {
+            width: auto;
+            flex: 1;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .resend-code {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .resend-code a {
+            color: #403B4A;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .resend-code a:hover {
+            text-decoration: underline;
+        }
+
+        .validation-summary-errors {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #721c24;
+        }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .field-validation-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .dev-code-display {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        #hiddenCodeInput {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="forgot-container">
+        <div class="forgot-header">
+            <i class="fas fa-shield-alt"></i>
+            <h2>Mã Xác Nhận</h2>
+            <p>Vui lòng nhập mã đã được gửi đến email</p>
+        </div>
+
+        <div class="forgot-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 15px; margin-bottom: 20px; color: #155724; text-align: center;">
+                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @using (Html.BeginForm("VerifyCode", "Account", FormMethod.Post, new { id = "codeForm" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Email)
+                @Html.HiddenFor(m => m.Code, new { id = "hiddenCodeInput" })
+
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+
+                <div class="input-group">
+                    <label class="form-label">
+                        <i class="fas fa-shield-alt"></i> Nhập Mã Xác Nhận
+                    </label>
+                    <div class="code-inputs">
+                        <input type="text" maxlength="1" class="form-control code-input" id="code1" required>
+                        <input type="text" maxlength="1" class="form-control code-input" id="code2" required>
+                        <input type="text" maxlength="1" class="form-control code-input" id="code3" required>
+                        <input type="text" maxlength="1" class="form-control code-input" id="code4" required>
+                        <input type="text" maxlength="1" class="form-control code-input" id="code5" required>
+                        <input type="text" maxlength="1" class="form-control code-input" id="code6" required>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Code, "", new { @class = "field-validation-error" })
+                </div>
+                <div class="info-text">
+                    Chúng tôi đã gửi mã xác nhận 6 số đến email <strong>@Model.Email</strong>
+                </div>
+                <div class="resend-code">
+                    Không nhận được mã? <a href="#" onclick="resendCode(); return false;">Gửi lại</a>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn-custom btn-secondary-custom" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                    <button type="submit" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-check"></i> Xác nhận
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const codeInputs = document.querySelectorAll('.code-input');
+        const hiddenCodeInput = document.getElementById('hiddenCodeInput');
+
+        // Xử lý nhập mã tự động chuyển ô
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                // Chỉ cho phép số
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                if(this.value.length === 1 && index < codeInputs.length - 1) {
+                    codeInputs[index + 1].focus();
+                }
+                
+                updateHiddenInput();
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if(e.key === 'Backspace' && this.value === '' && index > 0) {
+                    codeInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numbers = paste.replace(/[^0-9]/g, '').substring(0, 6);
+                
+                for(let i = 0; i < numbers.length && i < codeInputs.length; i++) {
+                    codeInputs[i].value = numbers[i];
+                }
+                
+                if(numbers.length < codeInputs.length) {
+                    codeInputs[numbers.length].focus();
+                } else {
+                    codeInputs[codeInputs.length - 1].focus();
+                }
+                
+                updateHiddenInput();
+            });
+        });
+
+        function updateHiddenInput() {
+            const code = Array.from(codeInputs).map(input => input.value).join('');
+            hiddenCodeInput.value = code;
+        }
+
+        // Xử lý form submit
+        document.getElementById('codeForm').addEventListener('submit', function(e) {
+            updateHiddenInput();
+            const code = hiddenCodeInput.value;
+            
+            if(code.length !== 6) {
+                e.preventDefault();
+                alert('Vui lòng nhập đầy đủ 6 số');
+                return false;
+            }
+        });
+
+        // Gửi lại mã
+        function resendCode() {
+            if(!confirm('Bạn có muốn gửi lại mã xác nhận?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('Email', '@Model.Email');
+            
+            fetch('@Url.Action("ResendCode", "Account")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+            });
+        }
+
+        // Quay lại
+        function goBack() {
+            window.location.href = '@Url.Action("ForgotPassword", "Account")';
+        }
+    </script>
+</body>
+</html>
+
