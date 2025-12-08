@@ -16,6 +16,7 @@ namespace FashionStore.Services.Interfaces
         IEnumerable<Product> GetLatestProducts(int count = 8);
         IEnumerable<Product> GetProductsByCategory(int categoryId);
         IEnumerable<Product> SearchProducts(string searchTerm);
+        IEnumerable<Product> SearchProductsLive(string searchTerm, int limit = 5);
         IEnumerable<Product> GetProductsWithPaging(int page, int pageSize, out int totalCount);
         IEnumerable<Product> FilterProducts(int? categoryId, decimal? minPrice, decimal? maxPrice, bool? featured);
         

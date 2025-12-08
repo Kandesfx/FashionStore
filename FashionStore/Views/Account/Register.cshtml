@@ -1,75 +1,644 @@
 @model FashionStore.Models.ViewModels.RegisterViewModel
+@using System.Linq
 
 @{
-    ViewBag.Title = "Đăng ký";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Đăng Ký - Fashion Store";
+    Layout = null;
 }
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2>Đăng ký</h2>
-            <hr>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            @using (Html.BeginForm("Register", "Account", FormMethod.Post))
-            {
-                @Html.AntiForgeryToken()
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #403B4A 0%, #6B6576 50%, #E7E9BB 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Username, new { @class = "control-label" })
-                    @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
-                </div>
+        .register-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Email, new { @class = "control-label" })
-                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                </div>
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password, new { @class = "control-label" })
-                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                </div>
+        .register-header {
+            background: linear-gradient(135deg, #403B4A 0%, #5A5463 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: #E7E9BB;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "control-label" })
-                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
-                </div>
+        .register-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.FullName, new { @class = "control-label" })
-                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
-                </div>
+        .register-header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin: 0;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Phone, new { @class = "control-label" })
-                    @Html.TextBoxFor(m => m.Phone, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
-                </div>
+        .register-body {
+            padding: 40px 30px;
+        }
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Address, new { @class = "control-label" })
-                    @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
-                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger" })
-                </div>
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
 
-                <div class="form-group">
-                    <input type="submit" value="Đăng ký" class="btn btn-primary" />
-                </div>
+        .form-label {
+            font-weight: 500;
+            color: #403B4A;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .form-label i {
+            margin-right: 5px;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: #403B4A;
+            box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.15);
+            background: white;
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+        }
+
+        /* Hide all validation icons from Bootstrap */
+        .form-control.is-valid::after,
+        .form-control.is-valid::before,
+        .form-control.is-invalid::after,
+        .form-control.is-invalid::before,
+        .was-validated .form-control:valid::after,
+        .was-validated .form-control:valid::before,
+        .was-validated .form-control:invalid::after,
+        .was-validated .form-control:invalid::before,
+        .form-control.is-valid ~ .valid-feedback::before,
+        .form-control.is-invalid ~ .invalid-feedback::before {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Hide Bootstrap validation icons and feedback text */
+        .form-control.is-valid ~ .valid-feedback,
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: none !important;
+        }
+
+        /* Ensure no background images for validation icons */
+        .form-control.is-valid,
+        .form-control.is-invalid {
+            background-image: none !important;
+        }
+
+        /* Password fields need extra padding for eye icon */
+        .password-wrapper .form-control.is-valid,
+        .password-wrapper .form-control.is-invalid {
+            padding-right: 45px !important;
+        }
+
+        /* Regular fields */
+        .form-control:not(.password-wrapper .form-control).is-valid,
+        .form-control:not(.password-wrapper .form-control).is-invalid {
+            padding-right: 15px !important;
+        }
+
+        .invalid-feedback {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .valid-feedback {
+            display: none;
+        }
+
+        .field-validation-error {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .validation-summary-errors {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #721c24;
+        }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .input-group-text {
+            background: #403B4A;
+            border: 2px solid #403B4A;
+            color: #E7E9BB;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .input-group:focus-within .input-group-text {
+            background: #5A5463;
+            border-color: #403B4A;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #403B4A 0%, #5A5463 100%);
+            color: #E7E9BB;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(64, 59, 74, 0.3);
+            color: #fff;
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: #403B4A;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #E7E9BB;
+            text-decoration: underline;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #403B4A;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 576px) {
+            .register-header {
+                padding: 30px 20px;
             }
 
-            <p>Đã có tài khoản? @Html.ActionLink("Đăng nhập", "Login", "Account")</p>
+            .register-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .register-body {
+                padding: 30px 20px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 991px) {
+            .register-container {
+                max-width: 550px;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .register-container {
+                max-width: 500px;
+            }
+        }
+
+        @@media (min-width: 1400px) {
+            .register-container {
+                max-width: 550px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h2><i class="fas fa-user-plus me-2"></i>Đăng Ký</h2>
+                <p>Tạo tài khoản mới để bắt đầu mua sắm</p>
+            </div>
+            <div class="register-body">
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "registerForm", novalidate = "novalidate" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    var summaryErrors = ViewData.ModelState.Where(x => string.IsNullOrEmpty(x.Key)).SelectMany(x => x.Value.Errors).ToList();
+                    if (summaryErrors.Any())
+                    {
+                        <div class="validation-summary-errors">
+                            <ul>
+                                @foreach (var error in summaryErrors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                <div class="form-group">
+                        <label class="form-label" for="Username">
+                            <i class="fas fa-user me-1"></i>@Html.DisplayNameFor(m => m.Username)
+                        </label>
+                        @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Nhập tên đăng nhập", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="FullName">
+                            <i class="fas fa-id-card me-1"></i>@Html.DisplayNameFor(m => m.FullName)
+                        </label>
+                        @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", placeholder = "Nhập họ và tên", required = "required" })
+                        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="Email">
+                            <i class="fas fa-envelope me-1"></i>@Html.DisplayNameFor(m => m.Email)
+                        </label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "Nhập email", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="Phone">
+                            <i class="fas fa-phone me-1"></i>@Html.DisplayNameFor(m => m.Phone)
+                        </label>
+                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", type = "tel", placeholder = "Nhập số điện thoại", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="Address">
+                            <i class="fas fa-map-marker-alt me-1"></i>@Html.DisplayNameFor(m => m.Address)
+                        </label>
+                        @Html.TextAreaFor(m => m.Address, new { @class = "form-control", rows = "2", placeholder = "Nhập địa chỉ", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Address, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="password">
+                            <i class="fas fa-lock me-1"></i>@Html.DisplayNameFor(m => m.Password)
+                        </label>
+                        <div class="password-wrapper">
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required", id = "password" })
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+                </div>
+
+                <div class="form-group">
+                        <label class="form-label" for="confirmPassword">
+                            <i class="fas fa-lock me-1"></i>@Html.DisplayNameFor(m => m.ConfirmPassword)
+                        </label>
+                        <div class="password-wrapper">
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Xác nhận mật khẩu", required = "required", id = "confirmPassword" })
+                            <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
+                </div>
+
+                    <button type="submit" class="btn btn-register" id="submitBtn">
+                        <i class="fas fa-check-circle me-2"></i>Đăng Ký
+                    </button>
+
+                    <div class="login-link">
+                        Đã có tài khoản? @Html.ActionLink("Đăng nhập ngay", "Login", "Account")
+                </div>
+            }
+            </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function() {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            if (toggleConfirmPassword && confirmPassword) {
+                toggleConfirmPassword.addEventListener('click', function() {
+                    const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                    confirmPassword.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Form validation
+            const form = document.getElementById('registerForm');
+            const username = document.getElementById('Username');
+            const fullname = document.getElementById('FullName');
+            const email = document.getElementById('Email');
+            const phone = document.getElementById('Phone');
+            const address = document.getElementById('Address');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Validation functions
+            function validateUsername(value) {
+                if (!value || value.trim().length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập tên đăng nhập' };
+                }
+                if (value.length < 3) {
+                    return { valid: false, message: 'Tên đăng nhập phải có ít nhất 3 ký tự' };
+                }
+                if (value.length > 50) {
+                    return { valid: false, message: 'Tên đăng nhập không được quá 50 ký tự' };
+                }
+                if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                    return { valid: false, message: 'Tên đăng nhập chỉ chứa chữ, số và dấu gạch dưới' };
+                }
+                return { valid: true };
+            }
+
+            function validateFullname(value) {
+                if (!value || value.trim().length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập họ và tên' };
+                }
+                if (value.trim().length < 2) {
+                    return { valid: false, message: 'Họ và tên phải có ít nhất 2 ký tự' };
+                }
+                return { valid: true };
+            }
+
+            function validateEmail(value) {
+                if (!value || value.trim().length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập email' };
+                }
+                const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                if (!emailRegex.test(value)) {
+                    return { valid: false, message: 'Email không hợp lệ' };
+                }
+                return { valid: true };
+            }
+
+            function validatePhone(value) {
+                if (!value || value.trim().length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập số điện thoại' };
+                }
+                const phoneRegex = /^[0-9]{10,11}$/;
+                if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+                    return { valid: false, message: 'Số điện thoại không hợp lệ' };
+                }
+                return { valid: true };
+            }
+
+            function validateAddress(value) {
+                if (!value || value.trim().length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập địa chỉ' };
+                }
+                if (value.trim().length < 5) {
+                    return { valid: false, message: 'Địa chỉ phải có ít nhất 5 ký tự' };
+                }
+                return { valid: true };
+            }
+
+            function validatePassword(value) {
+                if (!value || value.length === 0) {
+                    return { valid: false, message: 'Vui lòng nhập mật khẩu' };
+                }
+                if (value.length < 6) {
+                    return { valid: false, message: 'Mật khẩu phải có ít nhất 6 ký tự' };
+                }
+                return { valid: true };
+            }
+
+            function validateConfirmPassword(value, passwordValue) {
+                if (!value || value.length === 0) {
+                    return { valid: false, message: 'Vui lòng xác nhận mật khẩu' };
+                }
+                if (value !== passwordValue) {
+                    return { valid: false, message: 'Mật khẩu xác nhận không khớp' };
+                }
+                return { valid: true };
+            }
+
+            // Set field state
+            function setFieldState(field, isValid, message) {
+                if (!field) return;
+                const feedback = field.parentElement.querySelector('.field-validation-error');
+                if (isValid) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                    if (feedback) {
+                        feedback.textContent = message;
+                        feedback.style.display = 'block';
+                    }
+                }
+            }
+
+            // Real-time validation
+            if (username) {
+                username.addEventListener('input', function() {
+                    const result = validateUsername(this.value);
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            if (fullname) {
+                fullname.addEventListener('input', function() {
+                    const result = validateFullname(this.value);
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            if (email) {
+                email.addEventListener('input', function() {
+                    const result = validateEmail(this.value);
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            if (phone) {
+                phone.addEventListener('input', function() {
+                    const result = validatePhone(this.value);
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            if (address) {
+                address.addEventListener('input', function() {
+                    const result = validateAddress(this.value);
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            if (password) {
+                password.addEventListener('input', function() {
+                    const result = validatePassword(this.value);
+                    setFieldState(this, result.valid, result.message);
+                    // Revalidate confirm password if it has a value
+                    if (confirmPassword && confirmPassword.value) {
+                        const confirmResult = validateConfirmPassword(confirmPassword.value, this.value);
+                        setFieldState(confirmPassword, confirmResult.valid, confirmResult.message);
+                    }
+                });
+            }
+
+            if (confirmPassword) {
+                confirmPassword.addEventListener('input', function() {
+                    const result = validateConfirmPassword(this.value, password ? password.value : '');
+                    setFieldState(this, result.valid, result.message);
+                });
+            }
+
+            // Form submission
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const usernameResult = username ? validateUsername(username.value) : { valid: true };
+                    const fullnameResult = fullname ? validateFullname(fullname.value) : { valid: true };
+                    const emailResult = email ? validateEmail(email.value) : { valid: true };
+                    const phoneResult = phone ? validatePhone(phone.value) : { valid: true };
+                    const addressResult = address ? validateAddress(address.value) : { valid: true };
+                    const passwordResult = password ? validatePassword(password.value) : { valid: true };
+                    // Không chặn submit nếu confirmPassword không khớp - để server-side validation xử lý
+                    // const confirmPasswordResult = confirmPassword ? validateConfirmPassword(confirmPassword.value, password ? password.value : '') : { valid: true };
+
+                    if (username) setFieldState(username, usernameResult.valid, usernameResult.message);
+                    if (fullname) setFieldState(fullname, fullnameResult.valid, fullnameResult.message);
+                    if (email) setFieldState(email, emailResult.valid, emailResult.message);
+                    if (phone) setFieldState(phone, phoneResult.valid, phoneResult.message);
+                    if (address) setFieldState(address, addressResult.valid, addressResult.message);
+                    if (password) setFieldState(password, passwordResult.valid, passwordResult.message);
+                    // Vẫn hiển thị lỗi real-time cho confirmPassword nhưng không chặn submit
+                    if (confirmPassword) {
+                        const confirmResult = validateConfirmPassword(confirmPassword.value, password ? password.value : '');
+                        setFieldState(confirmPassword, confirmResult.valid, confirmResult.message);
+                    }
+
+                    // Chỉ kiểm tra các field khác, bỏ qua confirmPassword trong validation chặn submit
+                    if (usernameResult.valid && fullnameResult.valid && emailResult.valid && 
+                        phoneResult.valid && addressResult.valid && passwordResult.valid) {
+                        // Form is valid, allow submission (server sẽ kiểm tra confirmPassword)
+                        if (submitBtn) {
+                            submitBtn.classList.add('loading');
+                        }
+                    } else {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
 

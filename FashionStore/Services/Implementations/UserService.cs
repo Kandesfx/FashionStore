@@ -13,12 +13,14 @@ namespace FashionStore.Services.Implementations
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IUnitOfWork unitOfWork)
+        public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         public User GetById(int id)
@@ -46,13 +48,13 @@ namespace FashionStore.Services.Implementations
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-            // Check if username exists
+            // Check if username exists - Tên tài khoản phải là duy nhất
             if (GetByUsername(model.Username) != null)
-                throw new InvalidOperationException("Tên đăng nhập đã tồn tại");
+                throw new InvalidOperationException("Tên đăng nhập này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.");
 
-            // Check if email exists
+            // Check if email exists - Email phải là duy nhất, mỗi email chỉ được đăng ký 1 tài khoản
             if (GetByEmail(model.Email) != null)
-                throw new InvalidOperationException("Email đã được sử dụng");
+                throw new InvalidOperationException("Email này đã được sử dụng để đăng ký tài khoản. Vui lòng sử dụng email khác hoặc đăng nhập nếu đã có tài khoản.");
 
             // Get User role (RoleId = 2)
             var userRole = _roleRepository.SingleOrDefault(r => r.RoleName == "User");
@@ -132,6 +134,50 @@ namespace FashionStore.Services.Implementations
             {
                 _userRepository.Update(user);
             }
+            _unitOfWork.Complete();
+        }
+
+        public string GenerateResetToken(string email)
+        {
+            var user = GetByEmail(email);
+            if (user == null)
+                throw new InvalidOperationException("Email không tồn tại trong hệ thống");
+
+            // Generate 6-digit code
+            var random = new Random();
+            var code = random.Next(100000, 999999).ToString();
+            
+            // Gửi email chứa mã OTP
+            try
+            {
+                _emailService.SendPasswordResetCode(email, code);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nhưng vẫn trả về code để không làm gián đoạn flow
+                System.Diagnostics.Debug.WriteLine($"Không thể gửi email: {ex.Message}");
+            }
+            
+            return code;
+        }
+
+        public bool VerifyResetToken(string email, string token)
+        {
+            // Token verification will be handled in controller using Session
+            // This method is kept for consistency
+            var user = GetByEmail(email);
+            return user != null;
+        }
+
+        public void ResetPasswordByToken(string email, string token, string newPassword)
+        {
+            var user = GetByEmail(email);
+            if (user == null)
+                throw new InvalidOperationException("Email không tồn tại trong hệ thống");
+
+            // Token verification should be done in controller before calling this
+            user.PasswordHash = PasswordHasher.HashPassword(newPassword);
+            _userRepository.Update(user);
             _unitOfWork.Complete();
         }
     }

@@ -296,10 +296,14 @@
     <Compile Include="Models\ViewModels\CartViewModel.cs" />
     <Compile Include="Models\ViewModels\CheckoutViewModel.cs" />
     <Compile Include="Models\ViewModels\HomeViewModel.cs" />
+    <Compile Include="Models\ViewModels\ForgotPasswordViewModel.cs" />
     <Compile Include="Models\ViewModels\LoginViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductViewModel.cs" />
     <Compile Include="Models\ViewModels\RegisterViewModel.cs" />
+    <Compile Include="Models\ViewModels\ResetPasswordViewModel.cs" />
+    <Compile Include="Models\ViewModels\ResendCodeViewModel.cs" />
     <Compile Include="Models\ViewModels\UserProfileViewModel.cs" />
+    <Compile Include="Models\ViewModels\VerifyCodeViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\Implementations\CartItemRepository.cs" />
     <Compile Include="Repositories\Implementations\CartRepository.cs" />
@@ -323,11 +327,13 @@
     <Compile Include="Repositories\Interfaces\IUserRepository.cs" />
     <Compile Include="Services\Implementations\CartService.cs" />
     <Compile Include="Services\Implementations\CategoryService.cs" />
+    <Compile Include="Services\Implementations\EmailService.cs" />
     <Compile Include="Services\Implementations\OrderService.cs" />
     <Compile Include="Services\Implementations\ProductService.cs" />
     <Compile Include="Services\Implementations\UserService.cs" />
     <Compile Include="Services\Interfaces\ICartService.cs" />
     <Compile Include="Services\Interfaces\ICategoryService.cs" />
+    <Compile Include="Services\Interfaces\IEmailService.cs" />
     <Compile Include="Services\Interfaces\IOrderService.cs" />
     <Compile Include="Services\Interfaces\IProductService.cs" />
     <Compile Include="Services\Interfaces\IUserService.cs" />
@@ -335,9 +341,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\site.css" />
+    <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Profile.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Views\Account\VerifyCode.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Admin\Dashboard\Index.cshtml" />
@@ -373,6 +382,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="bin\App_LocalResources\" />
     <Folder Include="obj\Debug\TempPE\" />
+    <Folder Include="Scripts\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -117,6 +117,32 @@ namespace FashionStore.Services.Implementations
                      (p.Description != null && p.Description.ToLower().Contains(term))));
         }
 
+        public IEnumerable<Product> SearchProductsLive(string searchTerm, int limit = 5)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return Enumerable.Empty<Product>();
+
+            if (_productRepository == null)
+                return Enumerable.Empty<Product>();
+
+            var term = searchTerm.ToLower().Trim();
+            
+            try
+            {
+                // Get all active products first, then filter in memory to avoid LINQ translation issues
+                var allActiveProducts = _productRepository.Find(p => p.IsActive);
+                return allActiveProducts
+                    .Where(p => p.ProductName != null && p.ProductName.ToLower().Contains(term))
+                    .Take(limit)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in SearchProductsLive: {ex.Message}");
+                return Enumerable.Empty<Product>();
+            }
+        }
+
         public IEnumerable<Product> GetProductsWithPaging(int page, int pageSize, out int totalCount)
         {
             var products = GetActiveProducts();

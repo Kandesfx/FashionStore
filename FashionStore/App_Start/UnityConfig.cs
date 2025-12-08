@@ -57,6 +57,7 @@ namespace FashionStore
             container.RegisterType<IUserService, UserService>();
             container.RegisterType<ICartService, CartService>();
             container.RegisterType<IOrderService, OrderService>();
+            container.RegisterType<IEmailService, EmailService>();
         }
     }
 }
