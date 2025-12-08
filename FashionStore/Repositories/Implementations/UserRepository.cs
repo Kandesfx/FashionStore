@@ -19,11 +19,19 @@ namespace FashionStore.Repositories.Implementations
 
         public User GetByUsername(string username)
         {
+            if (string.IsNullOrWhiteSpace(username))
+                return null;
+            
+            // Phân biệt hoa thường - so sánh chính xác
             return _dbSet.Include("Role").FirstOrDefault(u => u.Username == username);
         }
 
         public User GetByEmail(string email)
         {
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+            
+            // Phân biệt hoa thường - so sánh chính xác
             return _dbSet.Include("Role").FirstOrDefault(u => u.Email == email);
         }
     }

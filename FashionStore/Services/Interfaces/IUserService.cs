@@ -15,6 +15,9 @@ namespace FashionStore.Services.Interfaces
         bool ValidateUser(string username, string password);
         void Add(User user);
         System.Collections.Generic.IEnumerable<User> GetAll();
+        string GenerateResetToken(string email);
+        bool VerifyResetToken(string email, string token);
+        void ResetPasswordByToken(string email, string token, string newPassword);
     }
 }
 

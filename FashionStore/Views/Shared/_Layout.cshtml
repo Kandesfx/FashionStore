@@ -481,6 +481,105 @@
             font-size: 14px;
         }
 
+        /* Purchase toast */
+        .purchase-toast {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+            padding: 12px 14px;
+            min-width: 260px;
+            max-width: 340px;
+            border: 1px solid #f0f0f0;
+            opacity: 0;
+            transform: translateY(120%);
+            transition: all 0.35s ease;
+            z-index: 1100;
+        }
+
+        .purchase-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .purchase-toast img {
+            width: 58px;
+            height: 58px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .purchase-toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .purchase-toast-title {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .purchase-toast-name {
+            font-size: 14px;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 2px;
+            line-height: 1.35;
+        }
+
+        .purchase-toast-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .purchase-toast-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .purchase-toast-link:hover {
+            text-decoration: underline;
+            color: #b08444;
+        }
+
+        .purchase-toast-close {
+            background: transparent;
+            border: none;
+            color: #999;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 6px;
+            line-height: 1;
+        }
+
+        .purchase-toast-close:hover {
+            color: var(--text-color);
+        }
+
+        @@media (max-width: 767px) {
+            .purchase-toast {
+                left: 12px;
+                right: 12px;
+                bottom: 14px;
+                width: auto;
+                max-width: unset;
+            }
+        }
+
         /* Mobile Responsive */
         @@media (max-width: 991px) {
             .logo-text {
@@ -738,6 +837,20 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- Purchase toast -->
+    <div id="purchaseToast" class="purchase-toast" aria-live="polite">
+        <img id="purchaseToastImage" src="/Image/default-product.jpg" alt="Sản phẩm">
+        <div class="purchase-toast-content">
+            <div class="purchase-toast-title">Sản phẩm</div>
+            <div id="purchaseToastName" class="purchase-toast-name">FashionStore</div>
+            <div id="purchaseToastTime" class="purchase-toast-time">Đang tải sản phẩm...</div>
+            <a id="purchaseToastLink" class="purchase-toast-link" href="#">
+                Xem chi tiết <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <button id="purchaseToastClose" class="purchase-toast-close" aria-label="Đóng thông báo">&times;</button>
+    </div>
+
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -975,6 +1088,95 @@
                     }
                 });
             }
+        });
+
+        // Random purchase toast
+        document.addEventListener('DOMContentLoaded', function () {
+            const toast = document.getElementById('purchaseToast');
+            const toastName = document.getElementById('purchaseToastName');
+            const toastTime = document.getElementById('purchaseToastTime');
+            const toastImage = document.getElementById('purchaseToastImage');
+            const toastLink = document.getElementById('purchaseToastLink');
+            const toastClose = document.getElementById('purchaseToastClose');
+
+            if (!toast || !toastName || !toastTime || !toastImage) {
+                console.warn('Purchase toast elements not found');
+                return;
+            }
+
+            const baseApiUrl = '@Url.Content("~/")';
+            const apiUrl = (baseApiUrl.endsWith('/') ? baseApiUrl : baseApiUrl + '/') + 'api/products?page=1&pageSize=50';
+            const detailBaseUrl = '@Url.Action("Details", "Product", new { id = "__id__" })';
+            const fallbackImage = '/Image/default-product.jpg';
+            let products = [];
+            let hideTimeout;
+            let intervalId;
+            let lastCloseAt = 0;
+
+            function randomMinutesAgo() {
+                const minutes = Math.floor(Math.random() * 50) + 5; // 5-54 phút
+                return `Đã được mua cách đây ${minutes} phút`;
+            }
+
+            function getRandomProduct() {
+                if (!products.length) return null;
+                const idx = Math.floor(Math.random() * products.length);
+                return products[idx];
+            }
+
+            function hideToast() {
+                toast.classList.remove('show');
+            }
+
+            function showToast(product) {
+                if (!product) return;
+
+                // Nếu vừa đóng thủ công, chờ 5s mới hiện lại
+                if (Date.now() - lastCloseAt < 5000) {
+                    return;
+                }
+
+                toastName.textContent = product.productName || 'Sản phẩm';
+                toastTime.textContent = randomMinutesAgo();
+                toastImage.src = product.imageUrl || fallbackImage;
+                toastImage.onerror = function () { this.src = fallbackImage; };
+                if (toastLink && detailBaseUrl) {
+                    toastLink.href = detailBaseUrl.replace('__id__', product.id);
+                }
+
+                toast.classList.add('show');
+
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(hideToast, 4200);
+            }
+
+            function startRotation() {
+                if (!products.length) return;
+
+                showToast(getRandomProduct());
+
+                clearInterval(intervalId);
+                intervalId = setInterval(() => {
+                    showToast(getRandomProduct());
+                }, 5000);
+            }
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.data && data.data.length) {
+                        // Ưu tiên sản phẩm có ảnh
+                        const withImage = data.data.filter(p => p.imageUrl);
+                        products = withImage.length ? withImage : data.data;
+                        startRotation();
+                    }
+                })
+                .catch(error => console.error('Không tải được danh sách sản phẩm cho toast:', error));
+
+            toastClose?.addEventListener('click', function () {
+                lastCloseAt = Date.now();
+                hideToast();
+            });
         });
     </script>
 

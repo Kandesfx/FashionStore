@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using FashionStore.Data;
+using FashionStore.Repositories.Implementations;
 
 namespace FashionStore.Controllers.Api
 {
@@ -15,8 +17,33 @@ namespace FashionStore.Controllers.Api
     {
         private readonly IProductService _productService;
 
-        public ProductsApiController(IProductService productService)
+        public ProductsApiController(IProductService productService = null)
         {
+            // Try to get from dependency resolver if not injected
+            if (productService == null)
+            {
+                try
+                {
+                    var resolver = GlobalConfiguration.Configuration.DependencyResolver;
+                    productService = (IProductService)resolver?.GetService(typeof(IProductService));
+                }
+                catch
+                {
+                    // If DI fails, create service manually (fallback)
+                    try
+                    {
+                        var context = new Data.ApplicationDbContext();
+                        var unitOfWork = new Repositories.Implementations.UnitOfWork(context);
+                        var productRepo = new Repositories.Implementations.ProductRepository(context);
+                        productService = new Services.Implementations.ProductService(productRepo, unitOfWork);
+                    }
+                    catch
+                    {
+                        // Last resort - will be null and handled in methods
+                    }
+                }
+            }
+            
             _productService = productService;
         }
 
@@ -176,6 +203,60 @@ namespace FashionStore.Controllers.Api
             catch (Exception ex)
             {
                 return InternalServerError(ex);
+            }
+        }
+
+        // GET: api/products/search/live
+        [HttpGet]
+        [Route("search/live")]
+        public IHttpActionResult SearchLive(string keyword, int limit = 5)
+        {
+            try
+            {
+                if (_productService == null)
+                {
+                    return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "ProductService is not available"));
+                }
+
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        data = new List<object>(),
+                        message = "Vui lòng nhập từ khóa tìm kiếm"
+                    });
+                }
+
+                var products = _productService.SearchProductsLive(keyword, limit);
+                var result = products.Select(p => new
+                {
+                    id = p.Id,
+                    productName = p.ProductName ?? string.Empty,
+                    price = p.Price,
+                    discountPrice = p.DiscountPrice,
+                    finalPrice = p.FinalPrice,
+                    imageUrl = p.ImageUrl ?? string.Empty,
+                    hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < p.Price
+                }).ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    data = result,
+                    message = "Tìm kiếm thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details for debugging
+                System.Diagnostics.Debug.WriteLine($"Error in SearchLive: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"Error: {ex.Message}"));
             }
         }
     }
