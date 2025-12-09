@@ -213,6 +213,8 @@
     <Content Include="Image\ao9.jpg" />
     <Content Include="Image\ao9_detail1.jpg" />
     <Content Include="Image\ao9_detail2.jpg" />
+    <Content Include="Image\hai.jpg" />
+    <Content Include="Image\luan.jpg" />
     <Content Include="Image\quan10.jpg" />
     <Content Include="Image\quan10_detail1.jpg" />
     <Content Include="Image\quan10_detail2.jpg" />
@@ -261,6 +263,7 @@
     <Content Include="Image\quan9.jpg" />
     <Content Include="Image\quan9_detail1.jpg" />
     <Content Include="Image\quan9_detail2.jpg" />
+    <Content Include="Image\thuan.jpg" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -325,6 +328,7 @@
     <Compile Include="Models\ViewModels\MomoPaymentViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductViewModel.cs" />
     <Compile Include="Models\ViewModels\RegisterViewModel.cs" />
+    <Compile Include="Models\ViewModels\ChangePasswordViewModel.cs" />
     <Compile Include="Models\ViewModels\ResetPasswordViewModel.cs" />
     <Compile Include="Models\ViewModels\ResendCodeViewModel.cs" />
     <Compile Include="Models\ViewModels\UserProfileViewModel.cs" />
@@ -372,6 +376,7 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Profile.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\ChangePassword.cshtml" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Account\VerifyCode.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
@@ -400,6 +405,8 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Payment\MomoQr.cshtml" />
     <Content Include="Views\Payment\MomoReturn.cshtml" />
+    <Content Include="Views\Account\UserProfile.cshtml" />
+    <Content Include="Views\Order\Details.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

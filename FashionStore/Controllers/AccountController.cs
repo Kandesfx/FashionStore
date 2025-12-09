@@ -249,6 +249,46 @@ namespace FashionStore.Controllers
             return View(model);
         }
 
+        // GET: Account/ChangePassword
+        [AuthorizeRole("User", "Admin")]
+        public ActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        // POST: Account/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRole("User", "Admin")]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var userId = (int)Session["UserId"];
+                _userService.ChangePassword(userId, model.OldPassword, model.NewPassword);
+                ViewBag.SuccessMessage = "Đổi mật khẩu thành công";
+
+                // Sau khi đổi mật khẩu thành công, xóa thông tin mật khẩu khỏi Model để tránh hiển thị lại
+                ModelState.Clear();
+                return View(new ChangePasswordViewModel());
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+            }
+            catch (System.Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+            }
+
+            return View(model);
+        }
+
         // GET: Account/ForgotPassword
         public ActionResult ForgotPassword()
         {

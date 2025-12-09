@@ -5,6 +5,7 @@
     Layout = null;
 }
 
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -41,6 +42,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -63,17 +65,17 @@
             position: relative;
         }
 
-        .login-header h2 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+            .login-header h2 {
+                font-size: 28px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
 
-        .login-header p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin: 0;
-        }
+            .login-header p {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 0;
+            }
 
         .login-body {
             padding: 40px 30px;
@@ -96,47 +98,47 @@
             color: #333;
         }
 
-        .form-control:focus {
-            border-color: #403B4A;
-            box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.15);
-            outline: none;
-        }
+            .form-control:focus {
+                border-color: #403B4A;
+                box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.15);
+                outline: none;
+            }
 
-        .form-control.is-invalid {
-            border-color: #dc3545;
-        }
+            .form-control.is-invalid {
+                border-color: #dc3545;
+            }
 
-        .form-control.is-valid {
-            border-color: #28a745;
-        }
+            .form-control.is-valid {
+                border-color: #28a745;
+            }
 
-        /* Hide all validation icons from Bootstrap */
-        .form-control.is-valid::after,
-        .form-control.is-valid::before,
-        .form-control.is-invalid::after,
-        .form-control.is-invalid::before,
-        .was-validated .form-control:valid::after,
-        .was-validated .form-control:valid::before,
-        .was-validated .form-control:invalid::after,
-        .was-validated .form-control:invalid::before,
-        .form-control.is-valid ~ .valid-feedback::before,
-        .form-control.is-invalid ~ .invalid-feedback::before {
-            display: none !important;
-            content: none !important;
-        }
+                /* Hide all validation icons from Bootstrap */
+                .form-control.is-valid::after,
+                .form-control.is-valid::before,
+                .form-control.is-invalid::after,
+                .form-control.is-invalid::before,
+                .was-validated .form-control:valid::after,
+                .was-validated .form-control:valid::before,
+                .was-validated .form-control:invalid::after,
+                .was-validated .form-control:invalid::before,
+                .form-control.is-valid ~ .valid-feedback::before,
+                .form-control.is-invalid ~ .invalid-feedback::before {
+                    display: none !important;
+                    content: none !important;
+                }
 
-        /* Hide Bootstrap validation icons and feedback text */
-        .form-control.is-valid ~ .valid-feedback,
-        .form-control.is-invalid ~ .invalid-feedback {
-            display: none !important;
-        }
+                /* Hide Bootstrap validation icons and feedback text */
+                .form-control.is-valid ~ .valid-feedback,
+                .form-control.is-invalid ~ .invalid-feedback {
+                    display: none !important;
+                }
 
-        /* Ensure no background images for validation icons */
-        .form-control.is-valid,
-        .form-control.is-invalid {
-            background-image: none !important;
-            padding-right: 15px !important;
-        }
+            /* Ensure no background images for validation icons */
+            .form-control.is-valid,
+            .form-control.is-invalid {
+                background-image: none !important;
+                padding-right: 15px !important;
+            }
 
         .invalid-feedback {
             font-size: 13px;
@@ -164,10 +166,10 @@
             color: #721c24;
         }
 
-        .validation-summary-errors ul {
-            margin: 0;
-            padding-left: 20px;
-        }
+            .validation-summary-errors ul {
+                margin: 0;
+                padding-left: 20px;
+            }
 
         .input-group-text {
             background: transparent;
@@ -201,31 +203,31 @@
             cursor: pointer;
         }
 
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(64, 59, 74, 0.4);
-        }
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(64, 59, 74, 0.4);
+            }
 
-        .btn-login:active {
-            transform: translateY(0);
-        }
+            .btn-login:active {
+                transform: translateY(0);
+            }
 
         .forgot-password {
             text-align: right;
             margin-top: 12px;
         }
 
-        .forgot-password a {
-            color: #403B4A;
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
+            .forgot-password a {
+                color: #403B4A;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.3s ease;
+            }
 
-        .forgot-password a:hover {
-            color: #E7E9BB;
-            text-decoration: underline;
-        }
+                .forgot-password a:hover {
+                    color: #E7E9BB;
+                    text-decoration: underline;
+                }
 
         .register-link {
             text-align: center;
@@ -236,16 +238,16 @@
             color: #666;
         }
 
-        .register-link a {
-            color: #403B4A;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
+            .register-link a {
+                color: #403B4A;
+                text-decoration: none;
+                font-weight: 600;
+                transition: color 0.3s ease;
+            }
 
-        .register-link a:hover {
-            color: #E7E9BB;
-        }
+                .register-link a:hover {
+                    color: #E7E9BB;
+                }
 
         /* Responsive */
         @@media (max-width: 576px) {
@@ -253,9 +255,9 @@
                 padding: 30px 20px;
             }
 
-            .login-header h2 {
-                font-size: 24px;
-            }
+                .login-header h2 {
+                    font-size: 24px;
+                }
 
             .login-body {
                 padding: 30px 20px;
@@ -284,23 +286,25 @@
             position: relative;
         }
 
-        .btn-login.loading::after {
-            content: "";
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid #ffffff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
+            .btn-login.loading::after {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                top: 50%;
+                left: 50%;
+                margin-left: -10px;
+                margin-top: -10px;
+                border: 2px solid #ffffff;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+            }
 
         @@keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .btn-login.loading span {
@@ -314,18 +318,18 @@
             gap: 8px;
         }
 
-        .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+            .remember-me input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
 
-        .remember-me label {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-        }
+            .remember-me label {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+                cursor: pointer;
+            }
     </style>
 </head>
 <body>
@@ -337,8 +341,8 @@
             </div>
             <div class="login-body">
                 @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm", novalidate = "novalidate" }))
-            {
-                @Html.AntiForgeryToken()
+                {
+                    @Html.AntiForgeryToken()
 
                     @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
 
@@ -351,7 +355,7 @@
                             @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Nhập tên đăng nhập", required = "required" })
                         </div>
                         @Html.ValidationMessageFor(m => m.Username, "", new { @class = "field-validation-error" })
-                </div>
+                    </div>
 
                     <div class="mb-3">
                         @Html.LabelFor(m => m.Password, new { @class = "form-label" })
@@ -362,7 +366,7 @@
                             @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required" })
                         </div>
                         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
-                </div>
+                    </div>
 
                     <div class="remember-me">
                         @Html.CheckBoxFor(m => m.RememberMe)
@@ -375,22 +379,22 @@
 
                     <div class="register-link">
                         Chưa có tài khoản? @Html.ActionLink("Đăng ký ngay", "Register", "Account", null, new { @class = "" })
-                </div>
-            }
-            
-            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Count > 0)
-            {
-                <div class="forgot-password" style="text-align: right; margin-top: 12px;">
-                    <a href="@Url.Action("ForgotPassword", "Account")"><i class="fas fa-key"></i> Quên mật khẩu?</a>
-                </div>
-            }
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Count > 0)
+                {
+                    <div class="forgot-password" style="text-align: right; margin-top: 12px;">
+                        <a href="@Url.Action("ForgotPassword", "Account")"><i class="fas fa-key"></i> Quên mật khẩu?</a>
+                    </div>
+                }
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('loginForm');
             const usernameInput = document.getElementById('Username');
             const passwordInput = document.getElementById('Password');
@@ -441,15 +445,15 @@
             // Show validation feedback (batch updates to prevent intermediate rendering)
             function showFeedback(input, error) {
                 if (!input) return;
-                
+
                 // Find validation message element
                 const validationMsg = input.closest('.mb-4, .mb-3')?.querySelector('.field-validation-error');
-                
+
                 // Use requestAnimationFrame to batch DOM updates
-                requestAnimationFrame(function() {
+                requestAnimationFrame(function () {
                     // Remove existing validation classes
                     input.classList.remove('is-invalid', 'is-valid');
-                    
+
                     if (error) {
                         input.classList.add('is-invalid');
                         if (validationMsg) {
@@ -468,7 +472,7 @@
             // Batch apply all validation feedback at once
             function applyValidationResults(results) {
                 // Use requestAnimationFrame to ensure all updates happen in one frame
-                requestAnimationFrame(function() {
+                requestAnimationFrame(function () {
                     if (results.username !== undefined && usernameInput) {
                         usernameInput.classList.remove('is-invalid', 'is-valid');
                         const usernameMsg = usernameInput.closest('.mb-4')?.querySelector('.field-validation-error');
@@ -485,7 +489,7 @@
                             }
                         }
                     }
-                    
+
                     if (results.password !== undefined && passwordInput) {
                         passwordInput.classList.remove('is-invalid', 'is-valid');
                         const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
@@ -507,7 +511,7 @@
 
             // Form submission - no client-side validation, only server-side
             if (form) {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     // Clear any previous validation states
                     if (usernameInput) {
                         usernameInput.classList.remove('is-invalid', 'is-valid');
@@ -535,7 +539,7 @@
             }
 
             // Check for server-side errors on page load and show border red
-            window.addEventListener('load', function() {
+            window.addEventListener('load', function () {
                 const validationSummary = document.querySelector('.validation-summary-errors');
                 if (validationSummary && validationSummary.textContent.trim() !== '') {
                     // Server has returned with errors (wrong username/password)
