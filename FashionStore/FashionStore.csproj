@@ -109,15 +109,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\PaymentController.cs" />
-    <Compile Include="Models\Momo\MomoCreatePaymentRequest.cs" />
-    <Compile Include="Models\Momo\MomoCreatePaymentResponse.cs" />
-    <Compile Include="Models\Momo\MomoIpnRequest.cs" />
-    <Compile Include="Models\ViewModels\MomoPaymentViewModel.cs" />
-    <Compile Include="Services\Implementations\MomoPaymentService.cs" />
-    <Compile Include="Services\Interfaces\IMomoPaymentService.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Web.Razor">
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
@@ -287,6 +278,7 @@
     <Compile Include="Controllers\CartController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Filters\AuthorizeRoleAttribute.cs" />
     <Compile Include="Data\ApplicationDbContext.cs" />
@@ -294,19 +286,43 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Entities\Address.cs" />
+    <Compile Include="Models\Entities\AuditLog.cs" />
     <Compile Include="Models\Entities\Cart.cs" />
     <Compile Include="Models\Entities\CartItem.cs" />
     <Compile Include="Models\Entities\Category.cs" />
+    <Compile Include="Models\Entities\Collection.cs" />
+    <Compile Include="Models\Entities\Coupon.cs" />
+    <Compile Include="Models\Entities\CouponUsage.cs" />
+    <Compile Include="Models\Entities\InventoryTransaction.cs" />
+    <Compile Include="Models\Entities\Media.cs" />
     <Compile Include="Models\Entities\Order.cs" />
     <Compile Include="Models\Entities\OrderDetail.cs" />
+    <Compile Include="Models\Entities\Payment.cs" />
+    <Compile Include="Models\Entities\Permission.cs" />
     <Compile Include="Models\Entities\Product.cs" />
+    <Compile Include="Models\Entities\ProductCollection.cs" />
+    <Compile Include="Models\Entities\ProductReview.cs" />
+    <Compile Include="Models\Entities\ProductVariant.cs" />
+    <Compile Include="Models\Entities\Promotion.cs" />
+    <Compile Include="Models\Entities\Refund.cs" />
+    <Compile Include="Models\Entities\Return.cs" />
+    <Compile Include="Models\Entities\ReviewComment.cs" />
+    <Compile Include="Models\Entities\ReviewHelpful.cs" />
+    <Compile Include="Models\Entities\ReviewImage.cs" />
+    <Compile Include="Models\Entities\ReviewReport.cs" />
     <Compile Include="Models\Entities\Role.cs" />
+    <Compile Include="Models\Entities\Shipment.cs" />
     <Compile Include="Models\Entities\User.cs" />
+    <Compile Include="Models\Momo\MomoCreatePaymentRequest.cs" />
+    <Compile Include="Models\Momo\MomoCreatePaymentResponse.cs" />
+    <Compile Include="Models\Momo\MomoIpnRequest.cs" />
     <Compile Include="Models\ViewModels\CartViewModel.cs" />
     <Compile Include="Models\ViewModels\CheckoutViewModel.cs" />
     <Compile Include="Models\ViewModels\HomeViewModel.cs" />
     <Compile Include="Models\ViewModels\ForgotPasswordViewModel.cs" />
     <Compile Include="Models\ViewModels\LoginViewModel.cs" />
+    <Compile Include="Models\ViewModels\MomoPaymentViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductViewModel.cs" />
     <Compile Include="Models\ViewModels\RegisterViewModel.cs" />
     <Compile Include="Models\ViewModels\ResetPasswordViewModel.cs" />
@@ -337,12 +353,14 @@
     <Compile Include="Services\Implementations\CartService.cs" />
     <Compile Include="Services\Implementations\CategoryService.cs" />
     <Compile Include="Services\Implementations\EmailService.cs" />
+    <Compile Include="Services\Implementations\MomoPaymentService.cs" />
     <Compile Include="Services\Implementations\OrderService.cs" />
     <Compile Include="Services\Implementations\ProductService.cs" />
     <Compile Include="Services\Implementations\UserService.cs" />
     <Compile Include="Services\Interfaces\ICartService.cs" />
     <Compile Include="Services\Interfaces\ICategoryService.cs" />
     <Compile Include="Services\Interfaces\IEmailService.cs" />
+    <Compile Include="Services\Interfaces\IMomoPaymentService.cs" />
     <Compile Include="Services\Interfaces\IOrderService.cs" />
     <Compile Include="Services\Interfaces\IProductService.cs" />
     <Compile Include="Services\Interfaces\IUserService.cs" />
@@ -380,6 +398,8 @@
     <None Include="packages.config" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
+    <Content Include="Views\Payment\MomoQr.cshtml" />
+    <Content Include="Views\Payment\MomoReturn.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -390,6 +410,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="bin\App_LocalResources\" />
+    <Folder Include="images\products\" />
     <Folder Include="obj\Debug\TempPE\" />
     <Folder Include="Scripts\" />
   </ItemGroup>

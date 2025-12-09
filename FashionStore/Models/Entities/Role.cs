@@ -19,6 +19,7 @@ namespace FashionStore.Models.Entities
 
         // Navigation properties
         public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<RolePermission> RolePermissions { get; set; }
     }
 }
 

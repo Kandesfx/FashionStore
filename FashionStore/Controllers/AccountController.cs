@@ -296,7 +296,7 @@ namespace FashionStore.Controllers
             {
                 ModelState.AddModelError("", ex.Message);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 ModelState.AddModelError("", "Đã xảy ra lỗi khi gửi email. Vui lòng thử lại sau.");
             }
@@ -434,7 +434,7 @@ namespace FashionStore.Controllers
             {
                 ModelState.AddModelError("", ex.Message);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
             }

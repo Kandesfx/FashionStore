@@ -5,16 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FashionStore.Models.Entities
 {
-    public class Category
+    /// <summary>
+    /// Bộ sưu tập sản phẩm
+    /// </summary>
+    public class Collection
     {
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Tên danh mục là bắt buộc")]
-        [StringLength(100)]
-        [Index("IX_Categories_CategoryName", IsUnique = true)]
-        [Display(Name = "Tên danh mục")]
-        public string CategoryName { get; set; }
+        [Required]
+        [StringLength(200)]
+        [Display(Name = "Tên bộ sưu tập")]
+        public string Name { get; set; }
 
         [StringLength(500)]
         [Display(Name = "Mô tả")]
@@ -24,7 +26,10 @@ namespace FashionStore.Models.Entities
         [Display(Name = "Hình ảnh")]
         public string ImageUrl { get; set; }
 
-        [Required]
+        [StringLength(200)]
+        [Display(Name = "Slug")]
+        public string Slug { get; set; }
+
         [Display(Name = "Thứ tự hiển thị")]
         public int DisplayOrder { get; set; } = 0;
 
@@ -32,25 +37,9 @@ namespace FashionStore.Models.Entities
         [Display(Name = "Kích hoạt")]
         public bool IsActive { get; set; } = true;
 
-        [ForeignKey("ParentCategory")]
-        public int? ParentCategoryId { get; set; }
-
-        public virtual Category ParentCategory { get; set; }
-
-        [StringLength(200)]
-        [Display(Name = "Slug")]
-        public string Slug { get; set; }
-
-        [StringLength(200)]
-        [Display(Name = "Meta Title")]
-        public string MetaTitle { get; set; }
-
-        [StringLength(500)]
-        [Display(Name = "Meta Description")]
-        public string MetaDescription { get; set; }
-
         [Required]
         [DataType(DataType.DateTime)]
+        [Display(Name = "Ngày tạo")]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         [DataType(DataType.DateTime)]
@@ -58,8 +47,7 @@ namespace FashionStore.Models.Entities
         public DateTime? UpdatedDate { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Product> Products { get; set; }
-        public virtual ICollection<Category> SubCategories { get; set; }
+        public virtual ICollection<ProductCollection> ProductCollections { get; set; }
     }
 }
 
