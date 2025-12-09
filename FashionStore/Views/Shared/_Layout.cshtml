@@ -952,7 +952,7 @@
                     return;
                 }
 
-                const baseUrl = '@Url.Action("Details", "Product")';
+                    const baseUrl = '@Url.Action("Details", "Product")';
                 container.innerHTML = products.map(product => {
                     const discount = product.hasDiscount ? calculateDiscount(product.price, product.discountPrice) : null;
                     const imageUrl = product.imageUrl || '/Image/default-product.jpg';

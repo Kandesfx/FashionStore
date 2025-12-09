@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Web.Mvc;
 using FashionStore.Filters;
+using System.Threading.Tasks;
 using FashionStore.Models.Entities;
 using FashionStore.Models.ViewModels;
 using FashionStore.Services.Interfaces;
@@ -13,11 +14,13 @@ namespace FashionStore.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly ICartService _cartService;
+        private readonly IMomoPaymentService _momoPaymentService;
 
-        public OrderController(IOrderService orderService, ICartService cartService)
+        public OrderController(IOrderService orderService, ICartService cartService, IMomoPaymentService momoPaymentService)
         {
             _orderService = orderService;
             _cartService = cartService;
+            _momoPaymentService = momoPaymentService;
         }
 
         // GET: Order/Checkout
@@ -47,7 +50,7 @@ namespace FashionStore.Controllers
         // POST: Order/Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Checkout(CheckoutViewModel model)
+        public async Task<ActionResult> Checkout(CheckoutViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -88,9 +91,48 @@ namespace FashionStore.Controllers
             
             _orderService.CreateOrder(order, orderDetails);
             
-            // Clear cart
-            _cartService.ClearCart(userId2);
+            if (model.PaymentMethod == "MoMo")
+            {
+                try
+                {
+                    var momoResponse = await _momoPaymentService.CreatePaymentAsync(
+                        order.Id.ToString(),
+                        order.TotalAmount,
+                        $"Thanh toán đơn hàng #{order.Id}");
+
+                    if (momoResponse == null || momoResponse.ResultCode != 0 || string.IsNullOrEmpty(momoResponse.PayUrl))
+                    {
+                        ModelState.AddModelError("", "Không tạo được liên kết thanh toán MoMo. Vui lòng thử lại hoặc chọn phương thức khác.");
+                        ViewBag.Cart = cart2;
+                        return View(model);
+                    }
+
+                    var momoVm = new MomoPaymentViewModel
+                    {
+                        OrderId = order.Id,
+                        Amount = order.TotalAmount,
+                        PayUrl = momoResponse.PayUrl,
+                        QrCodeUrl = string.IsNullOrEmpty(momoResponse.QrCodeUrl) ? null : momoResponse.QrCodeUrl,
+                        OrderInfo = $"Đơn hàng #{order.Id}"
+                    };
+
+                    // Không xóa giỏ ngay để tránh mất sản phẩm khi user chưa thanh toán
+                    ViewBag.Cart = cart2;
+                    ViewBag.MomoPayment = momoVm;
+                    ViewBag.ShowMomoModal = true;
+                    ModelState.Clear();
+                    return View(model);
+                }
+                catch (System.Exception ex)
+                {
+                    ModelState.AddModelError("", "Thanh toán MoMo gặp lỗi: " + ex.Message);
+                    ViewBag.Cart = cart2;
+                    return View(model);
+                }
+            }
             
+            // Clear cart for COD
+            _cartService.ClearCart(userId2);
             return RedirectToAction("Confirmation", new { orderId = order.Id });
         }
 

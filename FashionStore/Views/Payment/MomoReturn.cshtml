@@ -1,0 +1,19 @@
+@{
+    ViewBag.Title = "Kết quả thanh toán MoMo";
+    var resultCode = ViewBag.ResultCode;
+    var message = ViewBag.Message ?? "Không rõ kết quả";
+    var orderId = ViewBag.OrderId;
+    var success = string.Equals(resultCode, "0");
+}
+
+<div class="container" style="max-width:700px;margin:30px auto;">
+    <div class="alert @(success ? "alert-success" : "alert-warning")" role="alert">
+        <h4 class="alert-heading">Thanh toán MoMo @(success ? "thành công" : "không thành công")</h4>
+        <p>Đơn hàng #@orderId</p>
+        <hr />
+        <p class="mb-0">@message</p>
+    </div>
+    <a href="@Url.Action("MyOrders", "Order")" class="btn btn-primary">Xem đơn hàng</a>
+    <a href="@Url.Action("Checkout", "Order")" class="btn btn-outline-secondary ms-2">Quay lại thanh toán</a>
+</div>
+

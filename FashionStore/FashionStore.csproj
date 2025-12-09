@@ -109,6 +109,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\PaymentController.cs" />
+    <Compile Include="Models\Momo\MomoCreatePaymentRequest.cs" />
+    <Compile Include="Models\Momo\MomoCreatePaymentResponse.cs" />
+    <Compile Include="Models\Momo\MomoIpnRequest.cs" />
+    <Compile Include="Models\ViewModels\MomoPaymentViewModel.cs" />
+    <Compile Include="Services\Implementations\MomoPaymentService.cs" />
+    <Compile Include="Services\Interfaces\IMomoPaymentService.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System.Web.Razor">
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
