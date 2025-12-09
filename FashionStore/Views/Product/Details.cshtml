@@ -848,6 +848,7 @@
             $.ajax({
                 url: '/Cart/AddToCart',
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     productId: productId,
                     quantity: quantity
@@ -868,10 +869,22 @@
                             toast.classList.remove('show');
                         }, 3000);
                     } else {
+                        // Nếu chưa đăng nhập, điều hướng tới trang đăng nhập
+                        if (response.message && response.message.toLowerCase().indexOf('đăng nhập') >= 0) {
+                            var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                            window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                            return;
+                        }
                         alert(response.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
                     }
                 },
-                error: function () {
+                error: function (xhr) {
+                    // Nếu server trả về redirect hoặc unauthorized, đưa về trang đăng nhập
+                    if (xhr.status === 401 || xhr.status === 302) {
+                        var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                        window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                        return;
+                    }
                     alert('Có lỗi xảy ra. Vui lòng thử lại!');
                 }
             });

@@ -5,7 +5,6 @@ using FashionStore.Services.Interfaces;
 
 namespace FashionStore.Controllers
 {
-    [AuthorizeRole("User", "Admin")]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
@@ -34,6 +33,7 @@ namespace FashionStore.Controllers
 
         // POST: Cart/AddToCart
         [HttpPost]
+        [AllowAnonymous]
         public JsonResult AddToCart(int productId, int quantity = 1)
         {
             try
@@ -41,7 +41,7 @@ namespace FashionStore.Controllers
                 var userId = GetCurrentUserId();
                 if (userId == 0)
                 {
-                    return Json(new { success = false, message = "Vui lòng đăng nhập" });
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng." });
                 }
                 
                 _cartService.AddToCart(userId, productId, quantity);
