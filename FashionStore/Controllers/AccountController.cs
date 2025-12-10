@@ -4,6 +4,7 @@ using System.Web.Mvc;
 using FashionStore.Filters;
 using FashionStore.Models.ViewModels;
 using FashionStore.Services.Interfaces;
+using FashionStore.Utilities.Security;
 
 namespace FashionStore.Controllers
 {
@@ -23,7 +24,22 @@ namespace FashionStore.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            return View();
+
+            // Đọc cookie ghi nhớ đăng nhập (không truyền username để lấy tài khoản đầu tiên nếu có)
+            var loginData = CookieHelper.GetLoginCookie(Request);
+            
+            if (loginData != null && !string.IsNullOrEmpty(loginData.Username) && !string.IsNullOrEmpty(loginData.Password))
+            {
+                var model = new LoginViewModel
+                {
+                    Username = loginData.Username,
+                    Password = loginData.Password,
+                    RememberMe = true
+                };
+                return View(model);
+            }
+
+            return View(new LoginViewModel());
         }
 
         // POST: Account/Login
@@ -54,6 +70,34 @@ namespace FashionStore.Controllers
                     
                     // Reset số lần đăng nhập sai khi đăng nhập thành công
                     Session.Remove("LoginFailedAttempts");
+
+                    // Lưu hoặc xóa cookie ghi nhớ đăng nhập
+                    // Trong ASP.NET MVC, CheckBoxFor tạo 2 inputs:
+                    // 1. Hidden input với name="RememberMe" và value="false"
+                    // 2. Checkbox input với name="RememberMe" và value="true" (chỉ khi được tích)
+                    // Nếu checkbox được tích, Request.Form["RememberMe"] sẽ có giá trị "true,false"
+                    // Nếu checkbox không được tích, Request.Form["RememberMe"] sẽ chỉ có "false"
+                    
+                    bool rememberMe = false;
+                    string rememberMeFormValue = Request.Form["RememberMe"];
+                    
+                    // Kiểm tra từ Request.Form trước
+                    if (!string.IsNullOrEmpty(rememberMeFormValue))
+                    {
+                        // Nếu có "true" trong giá trị (checkbox được tích)
+                        if (rememberMeFormValue.Contains("true"))
+                        {
+                            rememberMe = true;
+                        }
+                    }
+                    // Nếu không tìm thấy trong Form, dùng giá trị từ Model
+                    else if (model.RememberMe)
+                    {
+                        rememberMe = true;
+                    }
+                    
+                    // Lưu cookie
+                    CookieHelper.SaveLoginCookie(Response, Request, model.Username, model.Password, rememberMe);
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -195,6 +239,9 @@ namespace FashionStore.Controllers
         // GET: Account/Logout
         public ActionResult Logout()
         {
+            // KHÔNG xóa cookie ghi nhớ đăng nhập khi logout
+            // Cookie sẽ được giữ lại để người dùng có thể đăng nhập lại nhanh chóng
+            
             Session.Clear();
             Session.Abandon();
             return RedirectToAction("Index", "Home");
@@ -511,6 +558,37 @@ namespace FashionStore.Controllers
             catch (System.Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: Account/GetRememberedPassword
+        [HttpGet]
+        public JsonResult GetRememberedPassword(string username)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(username))
+                {
+                    return Json(new { success = false, message = "Username không được để trống" }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Đọc cookie theo username
+                var loginData = CookieHelper.GetLoginCookie(Request, username);
+                
+                if (loginData != null && !string.IsNullOrEmpty(loginData.Password))
+                {
+                    return Json(new { 
+                        success = true, 
+                        username = loginData.Username,
+                        password = loginData.Password 
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { success = false, message = "Không tìm thấy thông tin đăng nhập đã lưu cho tài khoản này" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }

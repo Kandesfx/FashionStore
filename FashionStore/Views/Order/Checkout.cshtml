@@ -673,6 +673,152 @@
     opacity: 0.92;
     color: #fff;
 }
+
+/* Payment Success Modal Styles */
+.payment-result-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1060;
+    animation: fadeIn 0.3s ease;
+}
+
+.payment-result-modal {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    padding: 0;
+    position: relative;
+    text-align: center;
+    animation: slideUp 0.4s ease;
+}
+
+.payment-result-header {
+    padding: 30px 30px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.payment-result-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+    color: white;
+}
+
+.payment-result-icon.success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 8px 24px rgba(46, 204, 113, 0.4);
+}
+
+.payment-result-icon.failed {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
+}
+
+.payment-result-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+}
+
+.payment-result-subtitle {
+    color: #666;
+    font-size: 14px;
+}
+
+.payment-result-body {
+    padding: 25px 30px;
+}
+
+.payment-result-info {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.payment-result-info-label {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.payment-result-info-value {
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.payment-result-message {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.payment-result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-result {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.btn-result-primary {
+    background: linear-gradient(135deg, #c9a063, #d4b072);
+    color: white;
+    box-shadow: 0 4px 12px rgba(201, 160, 99, 0.3);
+}
+
+.btn-result-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201, 160, 99, 0.4);
+    color: white;
+}
+
+.btn-result-secondary {
+    background: white;
+    color: #666;
+    border: 2px solid #e5e5e5;
+}
+
+.btn-result-secondary:hover {
+    border-color: #c9a063;
+    color: #c9a063;
+}
+
+.auto-redirect-countdown {
+    color: #999;
+    font-size: 12px;
+    margin-top: 15px;
+}
 </style>
 
 <section class="checkout-section">
@@ -889,7 +1035,7 @@
     var qrImage = !string.IsNullOrEmpty(momo.QrCodeUrl)
         ? momo.QrCodeUrl
         : $"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={System.Web.HttpUtility.UrlEncode(momo.PayUrl)}";
-    <div id="momo-modal-backdrop" class="momo-modal-backdrop" data-show="@((ViewBag.ShowMomoModal == true).ToString().ToLower())">
+    <div id="momo-modal-backdrop" class="momo-modal-backdrop" data-show="@((ViewBag.ShowMomoModal == true).ToString().ToLower())" data-order-id="@momo.OrderId">
         <div class="momo-modal">
             <button type="button" id="momo-modal-close" class="close-btn">&times;</button>
             <div class="momo-header" style="display:flex;align-items:center;justify-content:center;gap:10px;">
@@ -936,6 +1082,12 @@
 
             // Form validation
             $('form').submit(function(e) {
+                // Don't submit if MoMo modal is open
+                if ($('#momo-modal-backdrop').hasClass('is-open')) {
+                    e.preventDefault();
+                    return false;
+                }
+
                 var isValid = true;
                 var errors = [];
 
@@ -977,21 +1129,355 @@
 
             // MoMo modal handling
             var $momoModal = $('#momo-modal-backdrop');
-            if ($momoModal.length && $momoModal.data('show') === true) {
+            var currentOrderId = null;
+            var paymentCheckInterval = null;
+            var paymentChannel = null;
+            
+            // Kiểm tra ngay khi trang load xem có kết quả thanh toán không
+            function checkPaymentResultOnLoad() {
+                if ($momoModal.length && $momoModal.data('order-id')) {
+                    var orderId = $momoModal.data('order-id');
+                    var paymentResultKey = 'momo_payment_result_' + orderId;
+                    var paymentResultStr = localStorage.getItem(paymentResultKey);
+                    if (paymentResultStr) {
+                        try {
+                            var paymentResult = JSON.parse(paymentResultStr);
+                            var timeDiff = new Date().getTime() - paymentResult.timestamp;
+                            if (timeDiff < 300000) { // Trong vòng 5 phút
+                                console.log('Phát hiện thanh toán đã hoàn thành khi load trang:', paymentResult);
+                                if (paymentResult.success && paymentResult.resultCode === "0") {
+                                    // Đã thanh toán thành công
+                                    $momoModal.removeClass('is-open').hide();
+                                    showSuccessModal(orderId, "Paid");
+                                    localStorage.removeItem(paymentResultKey);
+                                    return true; // Đã xử lý, không cần start polling
+                                } else if (!paymentResult.success) {
+                                    // Thanh toán thất bại
+                                    $momoModal.removeClass('is-open').hide();
+                                    showFailedModal(orderId, "Failed");
+                                    localStorage.removeItem(paymentResultKey);
+                                    return true;
+                                }
+                            } else {
+                                // Kết quả cũ, xóa đi
+                                localStorage.removeItem(paymentResultKey);
+                            }
+                        } catch (e) {
+                            console.error('Lỗi parse localStorage khi load:', e);
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            // Kiểm tra khi trang load
+            if (checkPaymentResultOnLoad()) {
+                // Đã xử lý, không cần start polling
+            } else if ($momoModal.length && $momoModal.data('show') === true) {
                 $momoModal.addClass('is-open');
+                $momoModal.show();
+                // Lấy orderId từ data attribute
+                currentOrderId = $momoModal.data('order-id');
+                console.log('Popup QR code được mở cho đơn hàng #' + currentOrderId);
+                
+                if (currentOrderId) {
+                    // Lắng nghe BroadcastChannel
+                    try {
+                        if (typeof BroadcastChannel !== 'undefined') {
+                            paymentChannel = new BroadcastChannel('momo_payment');
+                            paymentChannel.onmessage = function(event) {
+                                var data = event.data;
+                                if (data.type === 'payment_result' && data.orderId == currentOrderId) {
+                                    console.log('Nhận được message từ BroadcastChannel:', data);
+                                    if (data.success && data.resultCode === "0") {
+                                        clearInterval(paymentCheckInterval);
+                                        paymentCheckInterval = null;
+                                        closeMomoModal();
+                                        showSuccessModal(currentOrderId, "Paid");
+                                    } else if (!data.success) {
+                                        clearInterval(paymentCheckInterval);
+                                        paymentCheckInterval = null;
+                                        closeMomoModal();
+                                        showFailedModal(currentOrderId, "Failed");
+                                    }
+                                }
+                            };
+                            console.log('Đã lắng nghe BroadcastChannel');
+                        }
+                    } catch (e) {
+                        console.error('Lỗi BroadcastChannel:', e);
+                    }
+                    
+                    // Lắng nghe window.postMessage (fallback)
+                    window.addEventListener('message', function(event) {
+                        if (event.data && event.data.type === 'momo_payment_result' && event.data.orderId == currentOrderId) {
+                            console.log('Nhận được message qua postMessage:', event.data);
+                            if (event.data.success && event.data.resultCode === "0") {
+                                clearInterval(paymentCheckInterval);
+                                paymentCheckInterval = null;
+                                closeMomoModal();
+                                showSuccessModal(currentOrderId, "Paid");
+                            }
+                        }
+                    });
+                    
+                    // Kiểm tra khi tab được focus lại
+                    $(window).on('focus', function() {
+                        if (currentOrderId) {
+                            console.log('Tab được focus, kiểm tra lại trạng thái đơn hàng #' + currentOrderId);
+                            var paymentResultKey = 'momo_payment_result_' + currentOrderId;
+                            var paymentResultStr = localStorage.getItem(paymentResultKey);
+                            if (paymentResultStr) {
+                                try {
+                                    var paymentResult = JSON.parse(paymentResultStr);
+                                    var timeDiff = new Date().getTime() - paymentResult.timestamp;
+                                    if (timeDiff < 300000 && paymentResult.success && paymentResult.resultCode === "0") {
+                                        clearInterval(paymentCheckInterval);
+                                        paymentCheckInterval = null;
+                                        closeMomoModal();
+                                        showSuccessModal(currentOrderId, "Paid");
+                                        localStorage.removeItem(paymentResultKey);
+                                    }
+                                } catch (e) {
+                                    console.error('Lỗi parse localStorage khi focus:', e);
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Bắt đầu polling kiểm tra trạng thái thanh toán
+                    startPaymentStatusPolling(currentOrderId);
+                } else {
+                    console.error('Không tìm thấy orderId trong modal');
+                }
             }
 
-            function closeMomoModal() {
+            function startPaymentStatusPolling(orderId) {
+                if (paymentCheckInterval) {
+                    clearInterval(paymentCheckInterval);
+                }
+                
+                var checkCount = 0;
+                var maxChecks = 180; // Tối đa 3 phút (180 lần x 1 giây)
+                
+                console.log('Bắt đầu polling kiểm tra trạng thái đơn hàng #' + orderId);
+                
+                paymentCheckInterval = setInterval(function() {
+                    checkCount++;
+                    
+                    // Kiểm tra localStorage trước (nhanh hơn)
+                    var paymentResultKey = 'momo_payment_result_' + orderId;
+                    var paymentResultStr = localStorage.getItem(paymentResultKey);
+                    if (paymentResultStr) {
+                        try {
+                            var paymentResult = JSON.parse(paymentResultStr);
+                            // Kiểm tra xem kết quả có mới không (trong vòng 5 phút)
+                            var timeDiff = new Date().getTime() - paymentResult.timestamp;
+                            if (timeDiff < 300000) { // 5 phút
+                                console.log('Phát hiện kết quả thanh toán từ localStorage:', paymentResult);
+                                if (paymentResult.success && paymentResult.resultCode === "0") {
+                                    // Thanh toán thành công từ localStorage
+                                    clearInterval(paymentCheckInterval);
+                                    paymentCheckInterval = null;
+                                    localStorage.removeItem(paymentResultKey); // Xóa sau khi dùng
+                                    closeMomoModal();
+                                    showSuccessModal(orderId, "Paid");
+                                    return;
+                                } else if (!paymentResult.success) {
+                                    // Thanh toán thất bại từ localStorage
+                                    clearInterval(paymentCheckInterval);
+                                    paymentCheckInterval = null;
+                                    localStorage.removeItem(paymentResultKey); // Xóa sau khi dùng
+                                    closeMomoModal();
+                                    showFailedModal(orderId, "Failed");
+                                    return;
+                                }
+                            } else {
+                                // Kết quả cũ, xóa đi
+                                localStorage.removeItem(paymentResultKey);
+                            }
+                        } catch (e) {
+                            console.error('Lỗi parse localStorage:', e);
+                        }
+                    }
+                    
+                    // Kiểm tra từ server
+                    $.ajax({
+                        url: '@Url.Action("CheckStatus", "Order")',
+                        type: 'GET',
+                        data: { orderId: orderId },
+                        dataType: 'json',
+                        cache: false,
+                        success: function(response) {
+                            console.log('Kiểm tra trạng thái đơn hàng #' + orderId + ':', response);
+                            
+                            if (response && response.success) {
+                                if (response.isPaid || response.status === "Paid") {
+                                    // Thanh toán thành công
+                                    console.log('Phát hiện thanh toán thành công từ server!');
+                                    clearInterval(paymentCheckInterval);
+                                    paymentCheckInterval = null;
+                                    closeMomoModal();
+                                    showSuccessModal(orderId, response.status);
+                                } else if (response.status === "Failed") {
+                                    // Thanh toán thất bại
+                                    console.log('Phát hiện thanh toán thất bại từ server!');
+                                    clearInterval(paymentCheckInterval);
+                                    paymentCheckInterval = null;
+                                    closeMomoModal();
+                                    showFailedModal(orderId, response.status);
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Lỗi khi kiểm tra trạng thái:', error);
+                            // Lỗi khi kiểm tra, tiếp tục thử
+                        },
+                        complete: function() {
+                            // Dừng polling sau maxChecks lần
+                            if (checkCount >= maxChecks) {
+                                console.log('Đã đạt số lần kiểm tra tối đa, dừng polling');
+                                clearInterval(paymentCheckInterval);
+                                paymentCheckInterval = null;
+                            }
+                        }
+                    });
+                }, 1000); // Kiểm tra mỗi 1 giây
+            }
+
+            function showSuccessModal(orderId, status) {
+                console.log('Hiển thị modal thành công cho đơn hàng #' + orderId);
+                
+                // Xóa modal cũ nếu có
+                $('#payment-success-modal-backdrop, #payment-failed-modal-backdrop').remove();
+                
+                // Tạo modal thông báo thành công
+                var successHtml = `
+                    <div id="payment-success-modal-backdrop" class="payment-result-modal-backdrop" style="display: flex; z-index: 1070;">
+                        <div class="payment-result-modal">
+                            <div class="payment-result-header">
+                                <div class="payment-result-icon success">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <h3 class="payment-result-title">Thanh toán thành công!</h3>
+                                <p class="payment-result-subtitle">Đơn hàng của bạn đã được xử lý</p>
+                            </div>
+                            <div class="payment-result-body">
+                                <div class="payment-result-info">
+                                    <div class="payment-result-info-label">Mã đơn hàng</div>
+                                    <div class="payment-result-info-value">#${orderId}</div>
+                                </div>
+                                <div class="payment-result-message">
+                                    Thanh toán đã được xử lý thành công. Đơn hàng của bạn đang được chuẩn bị.
+                                </div>
+                                <div class="payment-result-actions">
+                                    <a href="@Url.Action("MyOrders", "Order")" class="btn-result btn-result-primary">
+                                        <i class="fas fa-shopping-bag"></i>
+                                        Xem đơn hàng
+                                    </a>
+                                    <a href="@Url.Action("Index", "Home")" class="btn-result btn-result-secondary">
+                                        <i class="fas fa-home"></i>
+                                        Về trang chủ
+                                    </a>
+                                </div>
+                                <div class="auto-redirect-countdown">
+                                    Tự động chuyển đến trang đơn hàng sau <span id="countdown-number">5</span> giây...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('body').append(successHtml);
+                
+                // Auto redirect sau 5 giây
+                var countdown = 5;
+                var countdownElement = $('#countdown-number');
+                var countdownInterval = setInterval(function() {
+                    countdown--;
+                    if (countdownElement.length) {
+                        countdownElement.text(countdown);
+                    }
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = '@Url.Action("MyOrders", "Order")';
+                    }
+                }, 1000);
+            }
+
+            function showFailedModal(orderId, status) {
+                // Tạo modal thông báo thất bại
+                var failedHtml = `
+                    <div id="payment-failed-modal-backdrop" class="payment-result-modal-backdrop" style="display: flex;">
+                        <div class="payment-result-modal">
+                            <div class="payment-result-header">
+                                <div class="payment-result-icon failed">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <h3 class="payment-result-title">Thanh toán thất bại</h3>
+                                <p class="payment-result-subtitle">Vui lòng thử lại hoặc chọn phương thức khác</p>
+                            </div>
+                            <div class="payment-result-body">
+                                <div class="payment-result-info">
+                                    <div class="payment-result-info-label">Mã đơn hàng</div>
+                                    <div class="payment-result-info-value">#${orderId}</div>
+                                </div>
+                                <div class="payment-result-message">
+                                    Thanh toán không thành công. Vui lòng kiểm tra lại thông tin thanh toán hoặc chọn phương thức thanh toán khác.
+                                </div>
+                                <div class="payment-result-actions">
+                                    <a href="@Url.Action("Checkout", "Order")" class="btn-result btn-result-primary">
+                                        <i class="fas fa-redo"></i>
+                                        Thử lại
+                                    </a>
+                                    <a href="@Url.Action("Index", "Cart")" class="btn-result btn-result-secondary">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Về giỏ hàng
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('body').append(failedHtml);
+                
+                // Cho phép đóng modal khi click vào backdrop
+                $('#payment-failed-modal-backdrop').on('click', function(e) {
+                    if (e.target.id === 'payment-failed-modal-backdrop') {
+                        $(this).remove();
+                    }
+                });
+            }
+
+            function closeMomoModal(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                console.log('Đóng popup QR code');
                 $momoModal.removeClass('is-open');
+                $momoModal.hide();
+                if (paymentCheckInterval) {
+                    clearInterval(paymentCheckInterval);
+                    paymentCheckInterval = null;
+                }
+                return false;
             }
 
-            $('#momo-modal-close, #momo-modal-close-2').on('click', function() {
-                closeMomoModal();
+            $('#momo-modal-close, #momo-modal-close-2').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeMomoModal(e);
+                return false;
             });
 
             $momoModal.on('click', function(e) {
                 if (e.target.id === 'momo-modal-backdrop') {
-                    closeMomoModal();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeMomoModal(e);
+                    return false;
                 }
             });
 

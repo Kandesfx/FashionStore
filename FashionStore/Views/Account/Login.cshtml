@@ -164,11 +164,16 @@
             padding: 15px;
             margin-bottom: 20px;
             color: #721c24;
+            display: block;
         }
 
             .validation-summary-errors ul {
                 margin: 0;
                 padding-left: 20px;
+            }
+
+            .validation-summary-errors:empty {
+                display: none;
             }
 
         .input-group-text {
@@ -344,8 +349,6 @@
                 {
                     @Html.AntiForgeryToken()
 
-                    @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
-
                     <div class="mb-4">
                         @Html.LabelFor(m => m.Username, new { @class = "form-label" })
                         <div class="input-group">
@@ -363,9 +366,17 @@
                             <span class="input-group-text">
                                 <i class="fas fa-lock"></i>
                             </span>
-                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required" })
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required", id = "Password" })
                         </div>
                         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+                        @{
+                            // Tạo hidden fields nếu có Model và có dữ liệu từ cookie (đã giải mã sẵn từ server)
+                            if (Model != null && !string.IsNullOrEmpty(Model.Password) && !string.IsNullOrEmpty(Model.Username))
+                            {
+                                <input type="hidden" id="SavedPassword" value="@Model.Password" />
+                                <input type="hidden" id="SavedUsername" value="@Model.Username" />
+                            }
+                        }
                     </div>
 
                     <div class="remember-me">
@@ -376,6 +387,17 @@
                     <button type="submit" class="btn btn-login" id="submitBtn">
                         <span><i class="fas fa-sign-in-alt"></i> Đăng Nhập</span>
                     </button>
+
+                    if (!ViewData.ModelState.IsValid)
+                    {
+                        var errors = ViewData.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                        if (errors.Any())
+                        {
+                            <div class="alert alert-danger mt-3" role="alert" style="border-radius: 10px; padding: 12px 15px; margin-top: 15px;">
+                                <i class="fas fa-exclamation-circle"></i> @string.Join("<br/>", errors)
+                            </div>
+                        }
+                    }
 
                     <div class="register-link">
                         Chưa có tài khoản? @Html.ActionLink("Đăng ký ngay", "Register", "Account", null, new { @class = "" })
@@ -398,7 +420,192 @@
             const form = document.getElementById('loginForm');
             const usernameInput = document.getElementById('Username');
             const passwordInput = document.getElementById('Password');
+            const rememberMeCheckbox = document.getElementById('RememberMe');
             const submitBtn = document.getElementById('submitBtn');
+
+            // Hàm đọc cookie từ browser
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+                return null;
+            }
+
+            // Lấy giá trị từ hidden fields (nếu có từ server - đã giải mã)
+            const savedPasswordInput = document.getElementById('SavedPassword');
+            const savedUsernameInput = document.getElementById('SavedUsername');
+            
+            // Đọc cookie trực tiếp từ browser (nếu server chưa đọc được)
+            const cookieUsername = getCookie('remember_username');
+            const cookiePasswordEncrypted = getCookie('remember_password');
+            
+            // Ưu tiên dùng giá trị từ server (đã giải mã), nếu không có thì dùng từ cookie
+            const savedUsername = savedUsernameInput ? savedUsernameInput.value : (cookieUsername || '');
+            const savedPassword = savedPasswordInput ? savedPasswordInput.value : '';
+            
+            // Lưu ý: Password từ cookie đã được mã hóa, không thể giải mã ở client
+            // Nên chỉ dùng password từ server (đã giải mã sẵn)
+            const modelRememberMe = @(Model?.RememberMe == true ? "true" : "false");
+
+            // Điền username từ cookie (nếu có)
+            if (cookieUsername && usernameInput && !usernameInput.value) {
+                usernameInput.value = cookieUsername;
+                // Trigger input event
+                const inputEvent = new Event('input', { bubbles: true });
+                usernameInput.dispatchEvent(inputEvent);
+            }
+
+            // Điền password từ server (đã giải mã sẵn) nếu có
+            function fillPasswordIfUsernameMatches() {
+                if (!usernameInput || !passwordInput) {
+                    return;
+                }
+
+                const currentUsername = usernameInput.value.trim();
+                
+                if (!currentUsername) {
+                    return;
+                }
+
+                // Kiểm tra nếu username khớp với username đã lưu từ server
+                if (savedPassword && savedUsername && currentUsername.toLowerCase() === savedUsername.toLowerCase()) {
+                    if (passwordInput.value === '' || passwordInput.value !== savedPassword) {
+                        passwordInput.value = savedPassword;
+                        
+                        // Trigger input event để xóa validation error
+                        const inputEvent = new Event('input', { bubbles: true });
+                        passwordInput.dispatchEvent(inputEvent);
+                        
+                        // Xóa validation error nếu có
+                        const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
+                        if (passwordMsg) {
+                            passwordMsg.style.display = 'none';
+                        }
+                        passwordInput.classList.remove('is-invalid');
+                    }
+                    return;
+                }
+
+                // Nếu username khác, gọi API để lấy password từ cookie
+                if (currentUsername.toLowerCase() !== (savedUsername || '').toLowerCase()) {
+                    // Gọi API để lấy password cho username này
+                    fetch('@Url.Action("GetRememberedPassword", "Account")?username=' + encodeURIComponent(currentUsername))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.password) {
+                                passwordInput.value = data.password;
+                                
+                                // Trigger input event
+                                const inputEvent = new Event('input', { bubbles: true });
+                                passwordInput.dispatchEvent(inputEvent);
+                                
+                                // Xóa validation error nếu có
+                                const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
+                                if (passwordMsg) {
+                                    passwordMsg.style.display = 'none';
+                                }
+                                passwordInput.classList.remove('is-invalid');
+                                
+                                // Tích checkbox remember me
+                                if (rememberMeCheckbox) {
+                                    rememberMeCheckbox.checked = true;
+                                }
+                            } else {
+                                // Không tìm thấy password cho username này, xóa password nếu nó là password đã lưu
+                                if (passwordInput.value === savedPassword) {
+                                    passwordInput.value = '';
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching remembered password:', error);
+                        });
+                }
+            }
+
+            // Điền password ban đầu nếu username đã được điền sẵn từ cookie
+            function initialFillPassword() {
+                if (!savedPassword || !savedUsername || !passwordInput || !usernameInput) {
+                    return;
+                }
+
+                const currentUsernameValue = usernameInput.value.trim();
+                
+                // Nếu username khớp hoặc username đã được điền sẵn
+                if (currentUsernameValue.toLowerCase() === savedUsername.toLowerCase() || 
+                    (currentUsernameValue === '' && savedUsername)) {
+                    
+                    function fillPassword() {
+                        if (passwordInput && passwordInput.value !== savedPassword) {
+                            // Điền password
+                            passwordInput.value = savedPassword;
+                            passwordInput.setAttribute('value', savedPassword);
+                            
+                            // Trigger events
+                            const inputEvent = new Event('input', { bubbles: true });
+                            passwordInput.dispatchEvent(inputEvent);
+                            
+                            const changeEvent = new Event('change', { bubbles: true });
+                            passwordInput.dispatchEvent(changeEvent);
+                            
+                            // Xóa validation error
+                            const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
+                            if (passwordMsg) {
+                                passwordMsg.style.display = 'none';
+                            }
+                            passwordInput.classList.remove('is-invalid');
+                        }
+                    }
+
+                    // Thử điền ngay lập tức và sau các khoảng thời gian
+                    fillPassword();
+                    setTimeout(fillPassword, 50);
+                    setTimeout(fillPassword, 100);
+                    setTimeout(fillPassword, 200);
+                }
+            }
+
+            // Chạy initial fill ngay khi DOM ready
+            if (savedPassword && savedPassword.trim() !== '' && savedUsername && savedUsername.trim() !== '') {
+                initialFillPassword();
+                
+                // Thử lại sau khi window load hoàn toàn
+                window.addEventListener('load', function() {
+                    setTimeout(initialFillPassword, 100);
+                    setTimeout(initialFillPassword, 500);
+                });
+            }
+
+            // Lắng nghe sự kiện khi người dùng nhập username
+            if (usernameInput) {
+                usernameInput.addEventListener('input', function() {
+                    fillPasswordIfUsernameMatches();
+                });
+
+                usernameInput.addEventListener('blur', function() {
+                    // Khi rời khỏi username field, kiểm tra lại
+                    setTimeout(fillPasswordIfUsernameMatches, 100);
+                });
+
+                usernameInput.addEventListener('paste', function() {
+                    // Khi paste vào username field, đợi một chút rồi kiểm tra
+                    setTimeout(function() {
+                        fillPasswordIfUsernameMatches();
+                    }, 150);
+                });
+
+                // Thêm keyup event để phát hiện khi người dùng gõ
+                usernameInput.addEventListener('keyup', function() {
+                    fillPasswordIfUsernameMatches();
+                });
+            }
+
+            // Đảm bảo checkbox được tích nếu RememberMe = true hoặc có saved credentials
+            if (rememberMeCheckbox) {
+                if (modelRememberMe === true || (savedPassword && savedUsername) || cookieUsername) {
+                    rememberMeCheckbox.checked = true;
+                }
+            }
 
             // Validation rules
             const validationRules = {

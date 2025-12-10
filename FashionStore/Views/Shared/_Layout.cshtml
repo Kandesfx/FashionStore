@@ -655,19 +655,11 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="@Url.Action("Index", "Home")">Trang chủ</a>
                                 </li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <li class="nav-item">
+                                    <a class="nav-link "  href="@Url.Action("Index", "Product")">
                                         Sản phẩm
                                     </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product")">Tất cả sản phẩm</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "ao-nam" })">Áo Nam</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "ao-nu" })">Áo Nữ</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "quan-nam" })">Quần Nam</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "quan-nu" })">Quần Nữ</a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Product", new { category = "vay" })">Váy</a></li>
-                                    </ul>
+                                   
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="@Url.Action("About", "Home")">Về chúng tôi</a>
