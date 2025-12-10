@@ -1,0 +1,106 @@
+@{
+    ViewBag.Title = "Cảnh báo tồn thấp";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-exclamation-triangle me-2"></i>Cảnh báo tồn thấp
+        </h5>
+        <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="mb-0">
+                <strong>Ngưỡng cảnh báo:</strong> @ViewBag.Threshold sản phẩm
+            </p>
+            <small class="text-muted">Các sản phẩm có tồn kho <= @ViewBag.Threshold sẽ được hiển thị ở đây</small>
+        </div>
+    </div>
+
+    @if (ViewBag.LowStockProducts != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.LowStockProducts).Any())
+    {
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Có <strong>@ViewBag.LowStockCount</strong> sản phẩm đang ở mức tồn thấp!
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Tồn kho</th>
+                        <th>Giá</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in ViewBag.LowStockProducts)
+                    {
+                        <tr class="@(product.Stock <= 0 ? "table-danger" : "")">
+                            <td><strong>#@product.Id</strong></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl" alt="@product.ProductName" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                                }
+                                else
+                                {
+                                    <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <strong>@product.ProductName</strong>
+                            </td>
+                            <td>
+                                @(product.Category?.CategoryName ?? "N/A")
+                            </td>
+                            <td>
+                                @if (product.Stock <= 0)
+                                {
+                                    <span class="badge bg-danger">Hết hàng</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">@product.Stock</span>
+                                }
+                            </td>
+                            <td>
+                                <strong>@product.Price.ToString("N0") đ</strong>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Product", new { productId = product.Id })" class="btn btn-info" title="Xem lịch sử">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    <a href="@Url.Action("Import", "AdminInventory", new { productId = product.Id })" class="btn btn-success" title="Nhập kho">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h5>Tất cả sản phẩm đều đủ tồn kho</h5>
+            <p class="text-muted">Không có sản phẩm nào ở mức tồn thấp.</p>
+        </div>
+    }
+</div>
+
