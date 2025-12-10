@@ -11,6 +11,8 @@ namespace FashionStore.Services.Interfaces
         IEnumerable<Order> GetOrdersByUser(int userId);
         void CreateOrder(Order order, List<OrderDetail> orderDetails);
         void UpdateOrderStatus(int orderId, string status);
+        void UpdateShippingAddress(int orderId, string shippingAddress);
+        void CancelOrder(int orderId);
         
         decimal CalculateOrderTotal(List<OrderDetail> orderDetails);
         bool ValidateOrder(List<OrderDetail> orderDetails);

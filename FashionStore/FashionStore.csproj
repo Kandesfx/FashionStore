@@ -368,6 +368,7 @@
     <Compile Include="Services\Interfaces\IOrderService.cs" />
     <Compile Include="Services\Interfaces\IProductService.cs" />
     <Compile Include="Services\Interfaces\IUserService.cs" />
+    <Compile Include="Utilities\Security\CookieHelper.cs" />
     <Compile Include="Utilities\Security\PasswordHasher.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,19 +1,352 @@
 @{
     ViewBag.Title = "Kết quả thanh toán MoMo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var resultCode = ViewBag.ResultCode;
     var message = ViewBag.Message ?? "Không rõ kết quả";
     var orderId = ViewBag.OrderId;
     var success = string.Equals(resultCode, "0");
 }
 
-<div class="container" style="max-width:700px;margin:30px auto;">
-    <div class="alert @(success ? "alert-success" : "alert-warning")" role="alert">
-        <h4 class="alert-heading">Thanh toán MoMo @(success ? "thành công" : "không thành công")</h4>
-        <p>Đơn hàng #@orderId</p>
-        <hr />
-        <p class="mb-0">@message</p>
+<style>
+    .payment-result-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .payment-result-modal {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 90%;
+        padding: 0;
+        position: relative;
+        text-align: center;
+        animation: slideUp 0.4s ease;
+    }
+
+    @@keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .payment-result-header {
+        padding: 30px 30px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .payment-result-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 40px;
+        color: white;
+    }
+
+    .payment-result-icon.success {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        box-shadow: 0 8px 24px rgba(46, 204, 113, 0.4);
+    }
+
+    .payment-result-icon.failed {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
+    }
+
+    .payment-result-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+
+    .payment-result-subtitle {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .payment-result-body {
+        padding: 25px 30px;
+    }
+
+    .payment-result-info {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .payment-result-info-label {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .payment-result-info-value {
+        color: #1a1a1a;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .payment-result-message {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .payment-result-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-result {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .btn-result-primary {
+        background: linear-gradient(135deg, #c9a063, #d4b072);
+        color: white;
+        box-shadow: 0 4px 12px rgba(201, 160, 99, 0.3);
+    }
+
+    .btn-result-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(201, 160, 99, 0.4);
+        color: white;
+    }
+
+    .btn-result-secondary {
+        background: white;
+        color: #666;
+        border: 2px solid #e5e5e5;
+    }
+
+    .btn-result-secondary:hover {
+        border-color: #c9a063;
+        color: #c9a063;
+    }
+
+    .auto-redirect-countdown {
+        color: #999;
+        font-size: 12px;
+        margin-top: 15px;
+    }
+</style>
+
+<div id="payment-result-modal-backdrop" class="payment-result-modal-backdrop">
+    <div class="payment-result-modal">
+        <div class="payment-result-header">
+            <div class="payment-result-icon @(success ? "success" : "failed")">
+                @if (success)
+                {
+                    <i class="fas fa-check"></i>
+                }
+                else
+                {
+                    <i class="fas fa-times"></i>
+                }
+            </div>
+            <h3 class="payment-result-title">
+                @(success ? "Thanh toán thành công!" : "Thanh toán thất bại")
+            </h3>
+            <p class="payment-result-subtitle">
+                @(success ? "Đơn hàng của bạn đã được xử lý" : "Vui lòng thử lại hoặc chọn phương thức khác")
+            </p>
+        </div>
+        <div class="payment-result-body">
+            <div class="payment-result-info">
+                <div class="payment-result-info-label">Mã đơn hàng</div>
+                <div class="payment-result-info-value">#@orderId</div>
+                @if (ViewBag.Order != null)
+                {
+                    var order = (FashionStore.Models.Entities.Order)ViewBag.Order;
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e5e5;">
+                        <div class="payment-result-info-label">Tổng tiền</div>
+                        <div class="payment-result-info-value" style="color: #c9a063;">@order.TotalAmount.ToString("N0")đ</div>
+                    </div>
+                }
+            </div>
+            
+            <div class="payment-result-message">
+                @message
+            </div>
+
+            <div class="payment-result-actions">
+                @if (success)
+                {
+                    <a href="@Url.Action("MyOrders", "Order")" class="btn-result btn-result-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Xem đơn hàng
+                    </a>
+                    <a href="@Url.Action("Index", "Home")" class="btn-result btn-result-secondary">
+                        <i class="fas fa-home"></i>
+                        Về trang chủ
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Checkout", "Order")" class="btn-result btn-result-primary">
+                        <i class="fas fa-redo"></i>
+                        Thử lại
+                    </a>
+                    <a href="@Url.Action("Index", "Cart")" class="btn-result btn-result-secondary">
+                        <i class="fas fa-shopping-cart"></i>
+                        Về giỏ hàng
+                    </a>
+                }
+            </div>
+
+            @if (success)
+            {
+                <div class="auto-redirect-countdown" id="countdown">
+                    Tự động chuyển đến trang đơn hàng sau <span id="countdown-number">5</span> giây...
+                </div>
+            }
+        </div>
     </div>
-    <a href="@Url.Action("MyOrders", "Order")" class="btn btn-primary">Xem đơn hàng</a>
-    <a href="@Url.Action("Checkout", "Order")" class="btn btn-outline-secondary ms-2">Quay lại thanh toán</a>
 </div>
+
+@section Scripts {
+    <script>
+        (function() {
+            function initPaymentResult() {
+                if (typeof jQuery === 'undefined') {
+                    setTimeout(initPaymentResult, 50);
+                    return;
+                }
+
+                jQuery(document).ready(function($) {
+                    // Lưu thông tin thanh toán vào localStorage và gửi qua BroadcastChannel
+                    @if (!string.IsNullOrEmpty(orderId))
+                    {
+                        <text>
+                        var orderId = '@orderId';
+                        var resultCode = '@resultCode';
+                        var success = @(success ? "true" : "false");
+                        var paymentResult = {
+                            orderId: orderId,
+                            resultCode: resultCode,
+                            success: success,
+                            timestamp: new Date().getTime()
+                        };
+                        
+                        // Lưu vào localStorage
+                        localStorage.setItem('momo_payment_result_' + orderId, JSON.stringify(paymentResult));
+                        console.log('Đã lưu kết quả thanh toán vào localStorage:', paymentResult);
+                        
+                        // Gửi message qua BroadcastChannel để các tab khác nhận được
+                        try {
+                            if (typeof BroadcastChannel !== 'undefined') {
+                                var channel = new BroadcastChannel('momo_payment');
+                                channel.postMessage({
+                                    type: 'payment_result',
+                                    orderId: orderId,
+                                    resultCode: resultCode,
+                                    success: success,
+                                    timestamp: paymentResult.timestamp
+                                });
+                                console.log('Đã gửi message qua BroadcastChannel');
+                                // Đóng channel sau 5 giây
+                                setTimeout(function() {
+                                    channel.close();
+                                }, 5000);
+                            }
+                        } catch (e) {
+                            console.error('Lỗi BroadcastChannel:', e);
+                        }
+                        
+                        // Gửi message qua window.postMessage (fallback)
+                        try {
+                            window.opener.postMessage({
+                                type: 'momo_payment_result',
+                                orderId: orderId,
+                                resultCode: resultCode,
+                                success: success
+                            }, '*');
+                            console.log('Đã gửi message qua window.postMessage');
+                        } catch (e) {
+                            console.log('Không thể gửi postMessage (có thể không phải popup)');
+                        }
+                        </text>
+                    }
+
+                    // Modal luôn hiển thị khi trang load
+                    $('#payment-result-modal-backdrop').show();
+
+                    // Auto redirect nếu thành công
+                    @if (success)
+                    {
+                        <text>
+                        var countdown = 5;
+                        var countdownElement = $('#countdown-number');
+                        var countdownInterval = setInterval(function() {
+                            countdown--;
+                            countdownElement.text(countdown);
+                            if (countdown <= 0) {
+                                clearInterval(countdownInterval);
+                                window.location.href = '@Url.Action("MyOrders", "Order")';
+                            }
+                        }, 1000);
+                        </text>
+                    }
+
+                    // Click outside modal để đóng (chỉ khi thất bại)
+                    @if (!success)
+                    {
+                        <text>
+                        $('#payment-result-modal-backdrop').on('click', function(e) {
+                            if (e.target.id === 'payment-result-modal-backdrop') {
+                                window.location.href = '@Url.Action("Checkout", "Order")';
+                            }
+                        });
+                        </text>
+                    }
+                });
+            }
+            
+            initPaymentResult();
+        })();
+    </script>
+}
 

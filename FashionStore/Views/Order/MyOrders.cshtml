@@ -424,25 +424,33 @@
         {
             <!-- Filter Tabs -->
             <div class="filter-tabs">
-                <a href="@Url.Action("MyOrders", "Order")" class="filter-tab active">
+                @{
+                    var currentStatus = ViewBag.CurrentStatus as string;
+                    var isAllActive = string.IsNullOrEmpty(currentStatus);
+                }
+                <a href="@Url.Action("MyOrders", "Order")" class="filter-tab @(isAllActive ? "active" : "")">
                     <i class="fas fa-list me-2"></i>
                     Tất cả
                 </a>
-                <a href="@Url.Action("MyOrders", "Order", new { status = "Pending" })" class="filter-tab">
+                <a href="@Url.Action("MyOrders", "Order", new { status = "Pending" })" class="filter-tab @(currentStatus == "Pending" ? "active" : "")">
                     <i class="fas fa-clock me-2"></i>
                     Chờ xử lý
                 </a>
-                <a href="@Url.Action("MyOrders", "Order", new { status = "Processing" })" class="filter-tab">
+                <a href="@Url.Action("MyOrders", "Order", new { status = "Processing" })" class="filter-tab @(currentStatus == "Processing" ? "active" : "")">
                     <i class="fas fa-cog me-2"></i>
                     Đang xử lý
                 </a>
-                <a href="@Url.Action("MyOrders", "Order", new { status = "Shipped" })" class="filter-tab">
+                <a href="@Url.Action("MyOrders", "Order", new { status = "Shipped" })" class="filter-tab @(currentStatus == "Shipped" ? "active" : "")">
                     <i class="fas fa-shipping-fast me-2"></i>
                     Đã giao hàng
                 </a>
-                <a href="@Url.Action("MyOrders", "Order", new { status = "Delivered" })" class="filter-tab">
+                <a href="@Url.Action("MyOrders", "Order", new { status = "Delivered" })" class="filter-tab @(currentStatus == "Delivered" ? "active" : "")">
                     <i class="fas fa-check-circle me-2"></i>
                     Đã nhận hàng
+                </a>
+                <a href="@Url.Action("MyOrders", "Order", new { status = "Cancelled" })" class="filter-tab @(currentStatus == "Cancelled" ? "active" : "")">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Đã hủy
                 </a>
             </div>
 
@@ -538,22 +546,3 @@
     </div>
 </section>
 
-@section scripts {
-    <script>
-        // Highlight active filter tab based on current status
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
-        
-        if (status) {
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.href.includes('status=' + status)) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            // Make "Tất cả" inactive if a filter is active
-            document.querySelectorAll('.filter-tab')[0].classList.remove('active');
-        }
-    </script>
-}

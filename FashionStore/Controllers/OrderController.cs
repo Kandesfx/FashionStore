@@ -65,7 +65,17 @@ namespace FashionStore.Controllers
             
             if (cart2 == null || !cart2.Items.Any())
             {
-                return RedirectToAction("Index", "Cart");
+                ModelState.AddModelError("", "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
+                ViewBag.Cart = cart2;
+                return View(model);
+            }
+
+            // Validate cart before creating order
+            if (!_cartService.ValidateCart(userId2))
+            {
+                ModelState.AddModelError("", "Giỏ hàng có sản phẩm không hợp lệ hoặc đã hết hàng. Vui lòng kiểm tra lại giỏ hàng.");
+                ViewBag.Cart = cart2;
+                return View(model);
             }
             
             // Create order
@@ -87,9 +97,28 @@ namespace FashionStore.Controllers
                 SubTotal = ci.SubTotal
             }).ToList();
             
-            order.TotalAmount = orderDetails.Sum(od => od.SubTotal);
+            // Calculate shipping fee (free if total >= 500,000, otherwise 30,000)
+            var subtotal = orderDetails.Sum(od => od.SubTotal);
+            var shippingFee = subtotal >= 500000 ? 0 : 30000;
+            order.ShippingFee = shippingFee;
+            order.TotalAmount = subtotal + shippingFee;
             
-            _orderService.CreateOrder(order, orderDetails);
+            try
+            {
+                _orderService.CreateOrder(order, orderDetails);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                ViewBag.Cart = cart2;
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Có lỗi xảy ra khi tạo đơn hàng: " + ex.Message);
+                ViewBag.Cart = cart2;
+                return View(model);
+            }
             
             if (model.PaymentMethod == "MoMo")
             {
@@ -151,10 +180,18 @@ namespace FashionStore.Controllers
         }
 
         // GET: Order/MyOrders
-        public ActionResult MyOrders()
+        public ActionResult MyOrders(string status = null)
         {
             var userId = GetCurrentUserId();
             var orders = _orderService.GetOrdersByUser(userId);
+            
+            // Filter by status if provided
+            if (!string.IsNullOrEmpty(status))
+            {
+                orders = orders.Where(o => o.Status != null && o.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+            }
+            
+            ViewBag.CurrentStatus = status;
             return View(orders);
         }
 
@@ -170,6 +207,129 @@ namespace FashionStore.Controllers
             }
 
             return View(order);
+        }
+
+        // GET: Order/CheckStatus/{orderId}
+        [HttpGet]
+        public JsonResult CheckStatus(int orderId)
+        {
+            var userId = GetCurrentUserId();
+            var order = _orderService.GetById(orderId);
+            
+            if (order == null || order.UserId != userId)
+            {
+                return Json(new { success = false, message = "Không tìm thấy đơn hàng" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new 
+            { 
+                success = true, 
+                orderId = order.Id,
+                status = order.Status,
+                isPaid = order.Status == "Paid"
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        // GET: Order/EditShippingAddress/5
+        public ActionResult EditShippingAddress(int id)
+        {
+            var userId = GetCurrentUserId();
+            var order = _orderService.GetById(id);
+            
+            if (order == null || order.UserId != userId)
+            {
+                return HttpNotFound();
+            }
+
+            if (order.Status != "Pending")
+            {
+                TempData["ErrorMessage"] = "Chỉ có thể sửa địa chỉ khi đơn hàng đang ở trạng thái Pending";
+                return RedirectToAction("Details", new { id = id });
+            }
+
+            ViewBag.OrderId = order.Id;
+            ViewBag.CurrentAddress = order.ShippingAddress;
+            return View();
+        }
+
+        // POST: Order/UpdateShippingAddress
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateShippingAddress(int orderId, string shippingAddress)
+        {
+            var userId = GetCurrentUserId();
+            var order = _orderService.GetById(orderId);
+            
+            if (order == null || order.UserId != userId)
+            {
+                return HttpNotFound();
+            }
+
+            if (order.Status != "Pending")
+            {
+                TempData["ErrorMessage"] = "Chỉ có thể sửa địa chỉ khi đơn hàng đang ở trạng thái Pending";
+                return RedirectToAction("Details", new { id = orderId });
+            }
+
+            if (string.IsNullOrWhiteSpace(shippingAddress))
+            {
+                TempData["ErrorMessage"] = "Địa chỉ giao hàng không được để trống";
+                ViewBag.OrderId = orderId;
+                ViewBag.CurrentAddress = order.ShippingAddress;
+                return View("EditShippingAddress");
+            }
+
+            try
+            {
+                _orderService.UpdateShippingAddress(orderId, shippingAddress);
+                TempData["SuccessMessage"] = "Đã cập nhật địa chỉ giao hàng thành công";
+                return RedirectToAction("Details", new { id = orderId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                ViewBag.OrderId = orderId;
+                ViewBag.CurrentAddress = order.ShippingAddress;
+                return View("EditShippingAddress");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật địa chỉ: " + ex.Message;
+                ViewBag.OrderId = orderId;
+                ViewBag.CurrentAddress = order.ShippingAddress;
+                return View("EditShippingAddress");
+            }
+        }
+
+        // POST: Order/Cancel/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Cancel(int id)
+        {
+            var userId = GetCurrentUserId();
+            var order = _orderService.GetById(id);
+            
+            if (order == null || order.UserId != userId)
+            {
+                return HttpNotFound();
+            }
+
+            try
+            {
+                _orderService.CancelOrder(id);
+                TempData["SuccessMessage"] = "Đã hủy đơn hàng thành công. Tồn kho sản phẩm đã được cập nhật.";
+                return RedirectToAction("Details", new { id = id });
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Details", new { id = id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi hủy đơn hàng: " + ex.Message;
+                return RedirectToAction("Details", new { id = id });
+            }
         }
 
         private int GetCurrentUserId()

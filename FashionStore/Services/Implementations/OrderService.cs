@@ -3,6 +3,7 @@ using FashionStore.Repositories.Interfaces;
 using FashionStore.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 
 namespace FashionStore.Services.Implementations
@@ -51,8 +52,18 @@ namespace FashionStore.Services.Implementations
             if (!ValidateOrder(orderDetails))
                 throw new InvalidOperationException("Đơn hàng không hợp lệ");
 
-            // Calculate total
-            order.TotalAmount = CalculateOrderTotal(orderDetails);
+            // Calculate total (should already include ShippingFee from OrderController)
+            // If ShippingFee is not set, calculate it here
+            var subtotal = CalculateOrderTotal(orderDetails);
+            if (order.ShippingFee == 0 && subtotal < 500000)
+            {
+                order.ShippingFee = 30000;
+            }
+            // Ensure TotalAmount includes ShippingFee
+            if (order.TotalAmount != subtotal + order.ShippingFee)
+            {
+                order.TotalAmount = subtotal + order.ShippingFee;
+            }
             order.OrderDate = DateTime.Now;
             order.Status = "Pending";
 
@@ -84,7 +95,8 @@ namespace FashionStore.Services.Implementations
             if (order == null)
                 throw new InvalidOperationException("Đơn hàng không tồn tại");
 
-            var validStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+            // Hợp lệ cả các trạng thái thanh toán
+            var validStatuses = new[] { "Pending", "Paid", "Failed", "Processing", "Shipped", "Delivered", "Cancelled" };
             if (!validStatuses.Contains(status))
                 throw new ArgumentException("Trạng thái không hợp lệ");
 
@@ -93,20 +105,102 @@ namespace FashionStore.Services.Implementations
             _unitOfWork.Complete();
         }
 
+        public void UpdateShippingAddress(int orderId, string shippingAddress)
+        {
+            var order = GetById(orderId);
+            if (order == null)
+                throw new InvalidOperationException("Đơn hàng không tồn tại");
+
+            if (order.Status != "Pending")
+                throw new InvalidOperationException("Chỉ có thể sửa địa chỉ khi đơn hàng đang ở trạng thái Pending");
+
+            if (string.IsNullOrWhiteSpace(shippingAddress))
+                throw new ArgumentException("Địa chỉ giao hàng không được để trống");
+
+            order.ShippingAddress = shippingAddress;
+            _orderRepository.Update(order);
+            _unitOfWork.Complete();
+        }
+
+        public void CancelOrder(int orderId)
+        {
+            var order = GetById(orderId);
+            if (order == null)
+                throw new InvalidOperationException("Đơn hàng không tồn tại");
+
+            if (order.Status == "Cancelled")
+                throw new InvalidOperationException("Đơn hàng đã được hủy trước đó");
+
+            if (order.Status != "Pending" && order.Status != "Paid")
+                throw new InvalidOperationException("Chỉ có thể hủy đơn hàng khi đang ở trạng thái Pending hoặc Paid");
+
+            // Trả lại tồn kho cho các sản phẩm trong đơn hàng
+            if (order.OrderDetails != null && order.OrderDetails.Any())
+            {
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = _productRepository.GetById(detail.ProductId);
+                    if (product != null)
+                    {
+                        product.Stock += detail.Quantity;
+                        _productRepository.Update(product);
+                    }
+                }
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            order.Status = "Cancelled";
+            order.CancelledDate = DateTime.Now;
+            _orderRepository.Update(order);
+            _unitOfWork.Complete();
+        }
+
         public decimal CalculateOrderTotal(List<OrderDetail> orderDetails)
         {
+            // This method is kept for backward compatibility
+            // TotalAmount should already include ShippingFee when passed from OrderController
             return orderDetails.Sum(od => od.SubTotal);
         }
 
         public bool ValidateOrder(List<OrderDetail> orderDetails)
         {
+            if (orderDetails == null || !orderDetails.Any())
+            {
+                throw new InvalidOperationException("Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
+            }
+
             foreach (var detail in orderDetails)
             {
+                if (detail == null)
+                {
+                    throw new InvalidOperationException("Thông tin sản phẩm không hợp lệ.");
+                }
+
+                if (detail.ProductId <= 0)
+                {
+                    throw new InvalidOperationException($"Mã sản phẩm không hợp lệ: {detail.ProductId}");
+                }
+
                 var product = _productRepository.GetById(detail.ProductId);
-                if (product == null || !product.IsActive)
-                    return false;
+                if (product == null)
+                {
+                    throw new InvalidOperationException($"Không tìm thấy sản phẩm với mã: {detail.ProductId}");
+                }
+                
+                if (!product.IsActive)
+                {
+                    throw new InvalidOperationException($"Sản phẩm '{product.ProductName}' đã ngừng bán.");
+                }
+                
+                if (detail.Quantity <= 0)
+                {
+                    throw new InvalidOperationException($"Số lượng sản phẩm '{product.ProductName}' phải lớn hơn 0.");
+                }
+                
                 if (product.Stock < detail.Quantity)
-                    return false;
+                {
+                    throw new InvalidOperationException($"Sản phẩm '{product.ProductName}' chỉ còn {product.Stock} sản phẩm trong kho. Vui lòng giảm số lượng.");
+                }
             }
             return true;
         }
