@@ -142,6 +142,7 @@ namespace FashionStore.Controllers
                         Amount = order.TotalAmount,
                         PayUrl = momoResponse.PayUrl,
                         QrCodeUrl = string.IsNullOrEmpty(momoResponse.QrCodeUrl) ? null : momoResponse.QrCodeUrl,
+                        Deeplink = string.IsNullOrEmpty(momoResponse.Deeplink) ? null : momoResponse.Deeplink,
                         OrderInfo = $"Đơn hàng #{order.Id}"
                     };
 
