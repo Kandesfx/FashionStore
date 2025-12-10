@@ -6,6 +6,7 @@ namespace FashionStore.Models.ViewModels
         public decimal Amount { get; set; }
         public string PayUrl { get; set; }
         public string QrCodeUrl { get; set; }
+        public string Deeplink { get; set; }
         public string OrderInfo { get; set; }
     }
 }

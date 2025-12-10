@@ -1032,9 +1032,11 @@
 @if (ViewBag.MomoPayment != null)
 {
     var momo = (FashionStore.Models.ViewModels.MomoPaymentViewModel)ViewBag.MomoPayment;
-    var qrImage = !string.IsNullOrEmpty(momo.QrCodeUrl)
-        ? momo.QrCodeUrl
-        : $"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={System.Web.HttpUtility.UrlEncode(momo.PayUrl)}";
+    // Ưu tiên deeplink, sau đó payUrl; chỉ fallback qrCodeUrl nếu thiếu
+    var qrData = !string.IsNullOrEmpty(momo.Deeplink)
+        ? momo.Deeplink
+        : (!string.IsNullOrEmpty(momo.PayUrl) ? momo.PayUrl : momo.QrCodeUrl);
+    var qrImage = $"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={System.Web.HttpUtility.UrlEncode(qrData)}";
     <div id="momo-modal-backdrop" class="momo-modal-backdrop" data-show="@((ViewBag.ShowMomoModal == true).ToString().ToLower())" data-order-id="@momo.OrderId">
         <div class="momo-modal">
             <button type="button" id="momo-modal-close" class="close-btn">&times;</button>

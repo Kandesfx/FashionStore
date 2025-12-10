@@ -19,10 +19,26 @@ namespace FashionStore.Controllers
         }
 
         // GET: Product
-        public ActionResult Index(int? categoryId, string sortBy, int page = 1)
+        public ActionResult Index(int? categoryId, string category, string sortBy, int page = 1)
         {
             var products = _productService.GetActiveProducts().ToList();
-            
+
+            // Map category slug/name -> categoryId (hỗ trợ link ở footer/header)
+            if (!categoryId.HasValue && !string.IsNullOrWhiteSpace(category))
+            {
+                var matchedCategory = _categoryService
+                    .GetActiveCategories()
+                    .FirstOrDefault(c =>
+                        string.Equals(c.Slug, category, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(c.CategoryName, category, StringComparison.OrdinalIgnoreCase));
+
+                if (matchedCategory != null)
+                {
+                    categoryId = matchedCategory.Id;
+                    ViewBag.CurrentCategorySlug = matchedCategory.Slug;
+                }
+            }
+
             // Filter by category
             if (categoryId.HasValue)
             {
@@ -56,6 +72,7 @@ namespace FashionStore.Controllers
             
             ViewBag.Categories = _categoryService.GetActiveCategories();
             ViewBag.CurrentCategoryId = categoryId;
+            ViewBag.CurrentCategorySlug = ViewBag.CurrentCategorySlug ?? category;
             ViewBag.SortBy = sortBy;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)System.Math.Ceiling(totalCount / (double)pageSize);

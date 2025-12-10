@@ -1,9 +1,11 @@
 @model FashionStore.Models.ViewModels.MomoPaymentViewModel
 @{
     ViewBag.Title = "Thanh toán MoMo";
-    var qrImage = !string.IsNullOrEmpty(Model.QrCodeUrl)
-        ? Model.QrCodeUrl
-        : $"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={System.Web.HttpUtility.UrlEncode(Model.PayUrl)}";
+    // Ưu tiên deeplink, sau đó payUrl; chỉ dùng qrCodeUrl nếu không có gì khác
+    var qrData = !string.IsNullOrEmpty(Model.Deeplink)
+        ? Model.Deeplink
+        : (!string.IsNullOrEmpty(Model.PayUrl) ? Model.PayUrl : Model.QrCodeUrl);
+    var qrImage = $"https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={System.Web.HttpUtility.UrlEncode(qrData)}";
 }
 
 <style>
