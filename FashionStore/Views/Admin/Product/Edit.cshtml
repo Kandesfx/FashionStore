@@ -42,6 +42,60 @@
             </div>
         </div>
 
+        <!-- Variants -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-swatchbook me-2"></i>Biến thể (Size / Màu / SKU)</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm" id="variantTable">
+                        <thead>
+                            <tr>
+                                <th>Size</th>
+                                <th>Màu</th>
+                                <th>SKU</th>
+                                <th>Giá riêng</th>
+                                <th>Tồn kho</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Variants != null && Model.Variants.Count > 0)
+                            {
+                                for (int i = 0; i < Model.Variants.Count; i++)
+                                {
+                                    <tr>
+                                        <td><input type="text" name="Variants[@i].Size" value="@Model.Variants[i].Size" class="form-control form-control-sm" /></td>
+                                        <td><input type="text" name="Variants[@i].Color" value="@Model.Variants[i].Color" class="form-control form-control-sm" /></td>
+                                        <td><input type="text" name="Variants[@i].SKU" value="@Model.Variants[i].SKU" class="form-control form-control-sm" /></td>
+                                        <td><input type="number" step="0.01" min="0" name="Variants[@i].Price" value="@(Model.Variants[i].Price?.ToString())" class="form-control form-control-sm" /></td>
+                                        <td><input type="number" min="0" name="Variants[@i].Stock" value="@Model.Variants[i].Stock" class="form-control form-control-sm" /></td>
+                                        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeVariantRow(this)"><i class="fas fa-trash"></i></button></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td><input type="text" name="Variants[0].Size" class="form-control form-control-sm" placeholder="VD: M" /></td>
+                                    <td><input type="text" name="Variants[0].Color" class="form-control form-control-sm" placeholder="VD: Red" /></td>
+                                    <td><input type="text" name="Variants[0].SKU" class="form-control form-control-sm" placeholder="SKU" /></td>
+                                    <td><input type="number" step="0.01" min="0" name="Variants[0].Price" class="form-control form-control-sm" placeholder="Giá biến thể" /></td>
+                                    <td><input type="number" min="0" name="Variants[0].Stock" class="form-control form-control-sm" placeholder="Tồn" value="0" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeVariantRow(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariantRow()">
+                    <i class="fas fa-plus"></i> Thêm biến thể
+                </button>
+                <small class="text-muted d-block mt-2">Nếu để trống tất cả trường trong biến thể thì sẽ không lưu.</small>
+            </div>
+        </div>
+
         <div class="row mb-3">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -125,6 +179,34 @@
     }
 </div>
 
+<script>
+    function addVariantRow() {
+        const table = document.querySelector('#variantTable tbody');
+        const index = table.querySelectorAll('tr').length;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" name="Variants[${index}].Size" class="form-control form-control-sm" placeholder="VD: M" /></td>
+            <td><input type="text" name="Variants[${index}].Color" class="form-control form-control-sm" placeholder="VD: Red" /></td>
+            <td><input type="text" name="Variants[${index}].SKU" class="form-control form-control-sm" placeholder="SKU" /></td>
+            <td><input type="number" step="0.01" min="0" name="Variants[${index}].Price" class="form-control form-control-sm" placeholder="Giá biến thể" /></td>
+            <td><input type="number" min="0" name="Variants[${index}].Stock" class="form-control form-control-sm" placeholder="Tồn" value="0" /></td>
+            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeVariantRow(this)"><i class="fas fa-trash"></i></button></td>
+        `;
+        table.appendChild(row);
+    }
+
+    function removeVariantRow(btn) {
+        const row = btn.closest('tr');
+        const tbody = row.parentElement;
+        tbody.removeChild(row);
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach((tr, idx) => {
+            tr.querySelectorAll('input').forEach(input => {
+                input.name = input.name.replace(/Variants\\[\\d+\\]/, `Variants[${idx}]`);
+            });
+        });
+    }
+</script>
 @section scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }

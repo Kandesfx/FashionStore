@@ -1,0 +1,172 @@
+@{
+    ViewBag.Title = "Nhập kho";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-arrow-down me-2"></i>Nhập kho
+        </h5>
+        <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @using (Html.BeginForm("Import", "AdminInventory", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label">Sản phẩm <span class="text-danger">*</span></label>
+                    @Html.DropDownList("productId", new SelectList(ViewBag.Products ?? new List<dynamic>(), "Id", "ProductName", ViewBag.SelectedProductId), 
+                        "Chọn sản phẩm", new { @class = "form-select", required = "required", id = "productSelect" })
+                </div>
+
+                <div class="mb-3" id="variantWrapper" style="display: none;">
+                    <label class="form-label">Biến thể (Size/Màu) <span class="text-danger">*</span></label>
+                    <select id="variantSelect" name="productVariantId" class="form-select">
+                        <option value="">Chọn biến thể</option>
+                    </select>
+                    <small class="text-muted">Chỉ hiển thị khi sản phẩm có biến thể</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tồn kho hiện tại</label>
+                    <input type="text" id="currentStock" class="form-control" readonly 
+                           value="@(ViewBag.CurrentStock != null ? ViewBag.CurrentStock + " sản phẩm" : "")" />
+                    <small class="text-muted">Số lượng tồn kho sẽ được cập nhật sau khi chọn sản phẩm/biến thể</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số lượng nhập <span class="text-danger">*</span></label>
+                    <input type="number" name="quantity" class="form-control" min="1" required />
+                    <small class="text-muted">Nhập số lượng sản phẩm cần nhập vào kho</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Ghi chú về lý do nhập kho (tùy chọn)"></textarea>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sau khi nhập kho, số lượng tồn kho của sản phẩm sẽ được cập nhật tự động.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Xác nhận nhập kho
+                    </button>
+                    <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productSelect = document.getElementById('productSelect');
+        const variantWrapper = document.getElementById('variantWrapper');
+        const variantSelect = document.getElementById('variantSelect');
+        const currentStock = document.getElementById('currentStock');
+
+        function loadStock(productId, productVariantId) {
+            if (!productId) {
+                currentStock.value = '';
+                return;
+            }
+            currentStock.value = 'Đang tải...';
+            $.ajax({
+                url: '@Url.Action("GetProductStock", "AdminInventory")',
+                type: 'GET',
+                data: { productId: productId, productVariantId: productVariantId || '' },
+                success: function(response) {
+                    if (response && response.success && response.stock !== undefined) {
+                        currentStock.value = response.stock + ' sản phẩm';
+                    } else {
+                        currentStock.value = 'Không xác định';
+                    }
+                },
+                error: function() {
+                    currentStock.value = 'Lỗi khi tải dữ liệu';
+                }
+            });
+        }
+
+        function loadVariants(productId) {
+            if (!productId) {
+                variantWrapper.style.display = 'none';
+                variantSelect.innerHTML = '<option value=\"\">Chọn biến thể</option>';
+                loadStock(null, null);
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("GetVariants", "AdminInventory")',
+                type: 'GET',
+                data: { productId: productId },
+                success: function(response) {
+                    if (response && response.success && response.variants && response.variants.length > 0) {
+                        variantWrapper.style.display = 'block';
+                        const options = ['<option value=\"\">Chọn biến thể</option>'];
+                        response.variants.forEach(v => {
+                            const nameParts = [];
+                            if (v.VariantName) nameParts.push(v.VariantName);
+                            if (v.Size) nameParts.push('Size: ' + v.Size);
+                            if (v.Color) nameParts.push('Màu: ' + v.Color);
+                            const label = nameParts.length ? nameParts.join(' | ') : ('Biến thể #' + v.Id);
+                            options.push(`<option value=\"${v.Id}\" data-stock=\"${v.Stock ?? 0}\">${label} (Tồn: ${v.Stock ?? 0})</option>`);
+                        });
+                        variantSelect.innerHTML = options.join('');
+                    } else {
+                        variantWrapper.style.display = 'none';
+                        variantSelect.innerHTML = '<option value=\"\">Chọn biến thể</option>';
+                    }
+                    // Sau khi load variants, cập nhật tồn kho theo sản phẩm hoặc biến thể đã chọn
+                    const selectedVariantId = variantSelect.value || null;
+                    loadStock(productId, selectedVariantId);
+                },
+                error: function() {
+                    variantWrapper.style.display = 'none';
+                    variantSelect.innerHTML = '<option value=\"\">Chọn biến thể</option>';
+                    loadStock(productId, null);
+                }
+            });
+        }
+
+        if (productSelect) {
+            productSelect.addEventListener('change', function() {
+                const productId = this.value;
+                loadVariants(productId);
+            });
+        }
+
+        if (variantSelect) {
+            variantSelect.addEventListener('change', function() {
+                const productId = productSelect.value;
+                const variantId = this.value || null;
+                loadStock(productId, variantId);
+            });
+        }
+
+        // Khởi động nếu đã có sẵn productId
+        if (productSelect && productSelect.value) {
+            loadVariants(productSelect.value);
+        }
+    });
+</script>
+

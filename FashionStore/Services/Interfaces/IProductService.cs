@@ -22,6 +22,10 @@ namespace FashionStore.Services.Interfaces
         
         bool CheckStock(int productId, int quantity);
         void UpdateStock(int productId, int quantity);
+
+        // Variants
+        IEnumerable<ProductVariant> GetVariantsByProductId(int productId);
+        ProductVariant GetVariantById(int variantId);
     }
 }
 

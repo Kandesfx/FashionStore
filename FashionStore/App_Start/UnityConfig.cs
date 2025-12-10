@@ -50,6 +50,16 @@ namespace FashionStore
             container.RegisterType<ICartRepository, CartRepository>();
             container.RegisterType<ICartItemRepository, CartItemRepository>();
             container.RegisterType<IRoleRepository, RoleRepository>();
+            container.RegisterType<IProductReviewRepository, ProductReviewRepository>();
+            container.RegisterType<IReviewCommentRepository, ReviewCommentRepository>();
+            container.RegisterType<IReviewImageRepository, ReviewImageRepository>();
+            container.RegisterType<IReviewHelpfulRepository, ReviewHelpfulRepository>();
+            container.RegisterType<IReviewReportRepository, ReviewReportRepository>();
+            container.RegisterType<IInventoryTransactionRepository, InventoryTransactionRepository>();
+            container.RegisterType<IPromotionRepository, PromotionRepository>();
+            container.RegisterType<ICouponRepository, CouponRepository>();
+            container.RegisterType<ICouponUsageRepository, CouponUsageRepository>();
+            container.RegisterType<IProductVariantRepository, ProductVariantRepository>();
 
             // Register Services
             container.RegisterType<IProductService, ProductService>();
@@ -59,6 +69,11 @@ namespace FashionStore
             container.RegisterType<IOrderService, OrderService>();
             container.RegisterType<IEmailService, EmailService>();
             container.RegisterType<IMomoPaymentService, MomoPaymentService>();
+            container.RegisterType<IProductReviewService, ProductReviewService>();
+            container.RegisterType<IInventoryService, InventoryService>();
+            container.RegisterType<IPromotionService, PromotionService>();
+            container.RegisterType<ICouponService, CouponService>();
+            container.RegisterType<IProductVariantService, ProductVariantService>();
         }
     }
 }

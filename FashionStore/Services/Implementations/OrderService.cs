@@ -1,4 +1,5 @@
 using FashionStore.Models.Entities;
+using FashionStore.Models.ViewModels;
 using FashionStore.Repositories.Interfaces;
 using FashionStore.Services.Interfaces;
 using System;
@@ -221,6 +222,106 @@ namespace FashionStore.Services.Implementations
                 PendingOrders = orders.Count(o => o.Status == "Pending"),
                 CompletedOrders = orders.Count(o => o.Status == "Delivered")
             };
+        }
+
+        public decimal GetRevenueByDateRange(DateTime startDate, DateTime endDate)
+        {
+            return _orderRepository.Find(o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.Status == "Delivered")
+                .Sum(o => o.TotalAmount);
+        }
+
+        public int GetOrderCountByDateRange(DateTime startDate, DateTime endDate)
+        {
+            return _orderRepository.Find(o => o.OrderDate >= startDate && o.OrderDate <= endDate).Count();
+        }
+
+        public IEnumerable<TopProductViewModel> GetTopSellingProducts(int topCount = 10, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var allOrderDetails = _orderDetailRepository.GetAll().ToList();
+            var allOrders = _orderRepository.GetAll().ToList();
+            var allProducts = _productRepository.GetAll().ToList();
+            
+            // Join order details with orders
+            var orderDetailsWithOrders = allOrderDetails
+                .Join(allOrders, 
+                    od => od.OrderId, 
+                    o => o.Id, 
+                    (od, o) => new { OrderDetail = od, Order = o })
+                .Where(x => x.Order.Status == "Delivered");
+            
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                orderDetailsWithOrders = orderDetailsWithOrders
+                    .Where(x => x.Order.OrderDate >= startDate.Value && x.Order.OrderDate <= endDate.Value);
+            }
+
+            // Join with products
+            var orderDetailsWithProducts = orderDetailsWithOrders
+                .Join(allProducts,
+                    x => x.OrderDetail.ProductId,
+                    p => p.Id,
+                    (x, p) => new { x.OrderDetail, x.Order, Product = p });
+
+            var topProducts = orderDetailsWithProducts
+                .GroupBy(x => new { 
+                    x.OrderDetail.ProductId, 
+                    ProductName = x.Product.ProductName,
+                    ImageUrl = x.Product.ImageUrl ?? ""
+                })
+                .Select(g => new TopProductViewModel
+                {
+                    ProductId = g.Key.ProductId,
+                    ProductName = g.Key.ProductName,
+                    QuantitySold = g.Sum(x => x.OrderDetail.Quantity),
+                    Revenue = g.Sum(x => x.OrderDetail.SubTotal),
+                    ImageUrl = g.Key.ImageUrl
+                })
+                .OrderByDescending(p => p.QuantitySold)
+                .Take(topCount)
+                .ToList();
+
+            return topProducts;
+        }
+
+        public List<RevenueChartData> GetRevenueByMonth(int months = 6)
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddMonths(-months);
+            
+            var orders = _orderRepository.Find(o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.Status == "Delivered")
+                .ToList();
+
+            var result = new List<RevenueChartData>();
+            
+            for (int i = months - 1; i >= 0; i--)
+            {
+                var monthStart = endDate.AddMonths(-i).Date;
+                monthStart = new DateTime(monthStart.Year, monthStart.Month, 1);
+                var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+                
+                var monthOrders = orders.Where(o => o.OrderDate >= monthStart && o.OrderDate <= monthEnd).ToList();
+                
+                result.Add(new RevenueChartData
+                {
+                    Month = monthStart.ToString("MM/yyyy"),
+                    Revenue = monthOrders.Sum(o => o.TotalAmount),
+                    OrderCount = monthOrders.Count
+                });
+            }
+
+            return result;
+        }
+
+        public List<OrderChartData> GetOrdersByStatusChart()
+        {
+            var orders = GetAll().ToList();
+            var statuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+            
+            return statuses.Select(status => new OrderChartData
+            {
+                Status = status,
+                Count = orders.Count(o => o.Status == status)
+            }).ToList();
         }
     }
 }

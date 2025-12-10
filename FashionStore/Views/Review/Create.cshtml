@@ -1,0 +1,264 @@
+@model FashionStore.Models.ViewModels.CreateReviewViewModel
+@{
+    ViewBag.Title = "Viết đánh giá";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .review-form-section {
+        padding: 60px 0;
+        background: #f8f9fa;
+    }
+
+    .review-form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .product-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .star-rating {
+        font-size: 32px;
+        cursor: pointer;
+        color: #ddd;
+    }
+
+    .star-rating .fas.fa-star {
+        transition: color 0.2s;
+    }
+
+    .star-rating .fas.fa-star.active,
+    .star-rating .fas.fa-star:hover {
+        color: #ffc107;
+    }
+
+    .image-preview {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-preview-item .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<div class="review-form-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Details", "Product", new { id = Model.ProductId })">@ViewBag.Product.ProductName</a></li>
+                        <li class="breadcrumb-item active">Viết đánh giá</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="review-form-card">
+            <h3 class="mb-4">Viết đánh giá</h3>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="d-flex align-items-center gap-3">
+                    @if (!string.IsNullOrEmpty(ViewBag.Product.ImageUrl))
+                    {
+                        <img src="@ViewBag.Product.ImageUrl" alt="@ViewBag.Product.ProductName" 
+                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />
+                    }
+                    <div>
+                        <h5 class="mb-1">@ViewBag.Product.ProductName</h5>
+                        <p class="text-muted mb-0">@ViewBag.Product.Price.ToString("N0") đ</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.IsVerifiedPurchase)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>Bạn đã mua sản phẩm này. Đánh giá của bạn sẽ được đánh dấu "Đã mua hàng".
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            @using (Html.BeginForm("Create", "Review", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.ProductId)
+                @Html.HiddenFor(m => m.OrderId)
+                @Html.HiddenFor(m => m.IsVerifiedPurchase)
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Điểm đánh giá <span class="text-danger">*</span></label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fas fa-star" data-rating="@i"></i>
+                        }
+                    </div>
+                    @Html.HiddenFor(m => m.Rating, new { id = "ratingValue" })
+                    @Html.ValidationMessageFor(m => m.Rating, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.Title, new { @class = "form-label fw-bold" })
+                    @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Tiêu đề đánh giá (tùy chọn)" })
+                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.ReviewText, new { @class = "form-label fw-bold" })
+                    @Html.TextAreaFor(m => m.ReviewText, new { @class = "form-control", rows = "6", placeholder = "Chia sẻ trải nghiệm của bạn về sản phẩm này..." })
+                    @Html.ValidationMessageFor(m => m.ReviewText, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Ảnh đính kèm (tối đa 5 ảnh)</label>
+                    <input type="file" name="Images" multiple accept="image/*" class="form-control" id="imageInput" />
+                    <small class="text-muted">Bạn có thể upload tối đa 5 ảnh để minh họa cho đánh giá của mình.</small>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Đánh giá của bạn sẽ được gửi để admin duyệt trước khi hiển thị công khai.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                    </button>
+                    <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-secondary">
+                        Hủy
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // Star rating
+    const stars = document.querySelectorAll('#starRating .fa-star');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            ratingInput.value = rating;
+            
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+    });
+
+    document.getElementById('starRating').addEventListener('mouseleave', function() {
+        const currentRating = parseInt(ratingInput.value) || 0;
+        stars.forEach((s, index) => {
+            if (index < currentRating) {
+                s.style.color = '#ffc107';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+
+    // Image preview
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const maxImages = 5;
+    let selectedImages = [];
+
+    imageInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        if (selectedImages.length + files.length > maxImages) {
+            alert(`Bạn chỉ có thể upload tối đa ${maxImages} ảnh.`);
+            return;
+        }
+
+        files.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" />
+                        <button type="button" class="remove-btn" onclick="removeImage(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    imagePreview.appendChild(div);
+                    selectedImages.push(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+
+    function removeImage(btn) {
+        btn.parentElement.remove();
+        // Note: In a real implementation, you'd need to update the file input
+    }
+</script>
+

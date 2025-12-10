@@ -34,7 +34,7 @@ namespace FashionStore.Controllers
         // POST: Cart/AddToCart
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult AddToCart(int productId, int quantity = 1)
+        public JsonResult AddToCart(int productId, int quantity = 1, int? productVariantId = null)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace FashionStore.Controllers
                     return Json(new { success = false, message = "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng." });
                 }
                 
-                _cartService.AddToCart(userId, productId, quantity);
+                _cartService.AddToCart(userId, productId, quantity, productVariantId);
                 
                 var cartCount = _cartService.GetCartItemCount(userId);
                 return Json(new { success = true, message = "Đã thêm vào giỏ hàng", cartCount = cartCount });

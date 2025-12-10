@@ -1,0 +1,326 @@
+@{
+    ViewBag.Title = "Quản lý đánh giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+    <div class="admin-card">
+        <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-star me-2"></i>Quản lý đánh giá sản phẩm
+        </h5>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Statistics", "AdminReview")" class="btn btn-info">
+                <i class="fas fa-chart-bar me-1"></i>Thống kê
+            </a>
+            <a href="@Url.Action("Reports", "AdminReview")" class="btn btn-danger">
+                <i class="fas fa-flag me-1"></i>Báo cáo
+            </a>
+        </div>
+        </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter Tabs -->
+    <div class="mb-3">
+        <ul class="nav nav-tabs" role="tablist">
+            @foreach (var status in ViewBag.Statuses)
+            {
+                <li class="nav-item">
+                    <a class="nav-link @(ViewBag.Status == status ? "active" : "")" 
+                       href="@Url.Action("Index", new { status = status })">
+                        @if (status == "All")
+                        {
+                            @:<i class="fas fa-list me-1"></i>Tất cả
+                        }
+                        else if (status == "Pending")
+                        {
+                            @:<i class="fas fa-clock me-1"></i>Chờ duyệt
+                        }
+                        else if (status == "Approved")
+                        {
+                            @:<i class="fas fa-check me-1"></i>Đã duyệt
+                        }
+                        else if (status == "Rejected")
+                        {
+                            @:<i class="fas fa-times me-1"></i>Đã từ chối
+                        }
+                        else if (status == "Reported")
+                        {
+                            @:<i class="fas fa-flag me-1"></i>Bị báo cáo
+                        }
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    @if (ViewBag.Reviews != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reviews).Any())
+    {
+        <!-- Bulk Actions -->
+        <div class="mb-3">
+            <form id="bulkForm" method="post" action="@Url.Action("BulkApprove", "AdminReview")">
+                @Html.AntiForgeryToken()
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-success" onclick="bulkAction('Approve')">
+                        <i class="fas fa-check me-1"></i>Duyệt đã chọn
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="bulkAction('Reject')">
+                        <i class="fas fa-times me-1"></i>Từ chối đã chọn
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAll" />
+                        </th>
+                        <th>ID</th>
+                        <th>Sản phẩm</th>
+                        <th>Người đánh giá</th>
+                        <th>Điểm</th>
+                        <th>Nội dung</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var review in ViewBag.Reviews)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="review-checkbox" name="reviewIds" value="@review.Id" />
+                            </td>
+                            <td><strong>#@review.Id</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (review.Product != null)
+                                    {
+                                        <div>
+                                            <strong>@review.Product.ProductName</strong>
+                                            <br />
+                                            <small class="text-muted">ID: @review.ProductId</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                @if (review.User != null)
+                                {
+                                    <div>
+                                        <strong>@review.User.Username</strong>
+                                        @if (review.IsVerifiedPurchase)
+                                        {
+                                            <span class="badge bg-success ms-1" title="Đã mua hàng">
+                                                <i class="fas fa-check-circle"></i>
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                    }
+                                    <span class="ms-2">@review.Rating/5</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="max-width: 300px;">
+                                    @if (!string.IsNullOrEmpty(review.Title))
+                                    {
+                                        <strong>@review.Title</strong><br />
+                                    }
+                                    <small class="text-muted">
+                                        @(review.ReviewText != null && review.ReviewText.Length > 100 
+                                            ? review.ReviewText.Substring(0, 100) + "..." 
+                                            : review.ReviewText)
+                                    </small>
+                                    @if (review.ReviewImages != null && review.ReviewImages.Count > 0)
+                                    {
+                                        <br />
+                                        <small class="text-info">
+                                            <i class="fas fa-image"></i> @review.ReviewImages.Count ảnh
+                                        </small>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                @if (review.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                    </span>
+                                }
+                                else if (review.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Đã duyệt
+                                    </span>
+                                }
+                                else if (review.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>Đã từ chối
+                                    </span>
+                                }
+                                else if (review.Status == "Reported")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-flag me-1"></i>Bị báo cáo (@review.ReportCount)
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <small>@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Details", new { id = review.Id })" 
+                                       class="btn btn-info" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (review.Status == "Pending" || review.Status == "Reported")
+                                    {
+                                        <form method="post" action="@Url.Action("Approve", new { id = review.Id })" 
+                                              style="display: inline;" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-success" title="Duyệt">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="@Url.Action("Reject", new { id = review.Id })" 
+                                              style="display: inline;" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="reason" value="Không phù hợp" />
+                                            <button type="submit" class="btn btn-danger" title="Từ chối" 
+                                                    onclick="return confirm('Bạn có chắc muốn từ chối đánh giá này?');">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <form method="post" action="@Url.Action("Delete", new { id = review.Id })" 
+                                          style="display: inline;" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger" title="Xóa"
+                                                onclick="return confirm('Bạn có chắc muốn xóa đánh giá này?');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { status = ViewBag.Status, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-star fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Không có đánh giá nào.</p>
+        </div>
+    }
+</div>
+
+<script>
+    // Select all checkbox
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.review-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Bulk actions
+    function bulkAction(action) {
+        const selected = Array.from(document.querySelectorAll('.review-checkbox:checked'))
+            .map(cb => cb.value);
+        
+        if (selected.length === 0) {
+            alert('Vui lòng chọn ít nhất một đánh giá.');
+            return;
+        }
+
+        if (action === 'Approve') {
+            if (confirm(`Bạn có chắc muốn duyệt ${selected.length} đánh giá đã chọn?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("BulkApprove", "AdminReview")';
+                form.innerHTML = '@Html.AntiForgeryToken()';
+                
+                selected.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'reviewIds';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        } else if (action === 'Reject') {
+            const reason = prompt('Nhập lý do từ chối:', 'Không phù hợp');
+            if (reason) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("BulkReject", "AdminReview")';
+                form.innerHTML = '@Html.AntiForgeryToken()' + 
+                    '<input type="hidden" name="reason" value="' + reason + '" />';
+                
+                selected.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'reviewIds';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    }
+</script>
+

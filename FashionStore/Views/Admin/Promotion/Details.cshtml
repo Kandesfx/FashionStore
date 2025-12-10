@@ -1,0 +1,204 @@
+@{
+    ViewBag.Title = "Chi tiết khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@if (ViewBag.Promotion == null)
+{
+    <div class="alert alert-danger">
+        Khuyến mãi không tồn tại.
+    </div>
+    return;
+}
+
+@{
+    var promotion = ViewBag.Promotion;
+    var now = DateTime.Now;
+    bool isActive = promotion.IsActive && promotion.StartDate <= now && promotion.EndDate >= now;
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-tag me-2"></i>Chi tiết khuyến mãi #@promotion.Id
+        </h5>
+        <div>
+            <a href="@Url.Action("Edit", new { id = promotion.Id })" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i>Sửa
+            </a>
+            <a href="@Url.Action("Index", "AdminPromotion")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin khuyến mãi</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Tên khuyến mãi:</strong><br />
+                            <h5>@promotion.Name</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Loại:</strong><br />
+                            <span class="badge bg-info fs-6">@promotion.PromotionType</span>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(promotion.Description))
+                    {
+                        <div class="mb-3">
+                            <strong>Mô tả:</strong><br />
+                            <p>@promotion.Description</p>
+                        </div>
+                    }
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Giảm giá:</strong><br />
+                            @if (promotion.DiscountPercentage.HasValue)
+                            {
+                                <span class="text-success fs-4">@promotion.DiscountPercentage%</span>
+                            }
+                            else if (promotion.DiscountAmount.HasValue)
+                            {
+                                <span class="text-success fs-4">@promotion.DiscountAmount.Value.ToString("N0") đ</span>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Điều kiện:</strong><br />
+                            @if (promotion.MinimumOrderAmount.HasValue)
+                            {
+                                <span>Đơn tối thiểu: <strong>@promotion.MinimumOrderAmount.Value.ToString("N0") đ</strong></span><br />
+                            }
+                            @if (promotion.MaximumDiscountAmount.HasValue)
+                            {
+                                <span>Giảm tối đa: <strong>@promotion.MaximumDiscountAmount.Value.ToString("N0") đ</strong></span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Thời gian:</strong><br />
+                            <small>
+                                Bắt đầu: <strong>@promotion.StartDate.ToString("dd/MM/yyyy HH:mm")</strong><br />
+                                Kết thúc: <strong>@promotion.EndDate.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Sử dụng:</strong><br />
+                            @if (promotion.UsageLimit.HasValue)
+                            {
+                                <span>@promotion.UsedCount / @promotion.UsageLimit lượt</span>
+                                <div class="progress mt-2" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: @((promotion.UsedCount * 100.0 / promotion.UsageLimit.Value))%">
+                                        @((promotion.UsedCount * 100.0 / promotion.UsageLimit.Value).ToString("F0"))%
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>@promotion.UsedCount lượt đã sử dụng</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Trạng thái:</strong><br />
+                        @if (isActive)
+                        {
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check-circle me-1"></i>Đang hoạt động
+                            </span>
+                        }
+                        else if (promotion.EndDate < now)
+                        {
+                            <span class="badge bg-secondary fs-6">
+                                <i class="fas fa-clock me-1"></i>Hết hạn
+                            </span>
+                        }
+                        else if (!promotion.IsActive)
+                        {
+                            <span class="badge bg-warning fs-6">
+                                <i class="fas fa-pause me-1"></i>Tạm dừng
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info fs-6">
+                                <i class="fas fa-calendar me-1"></i>Chưa bắt đầu
+                            </span>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <strong>Ngày tạo:</strong> @promotion.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")
+                            </small>
+                        </div>
+                        @if (promotion.UpdatedDate.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <strong>Ngày cập nhật:</strong> @promotion.UpdatedDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Thao tác</h6>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("Edit", new { id = promotion.Id })" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                    </a>
+                    <form method="post" action="@Url.Action("Delete", new { id = promotion.Id })" 
+                          onsubmit="return confirm('Bạn có chắc muốn xóa khuyến mãi này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-trash me-1"></i>Xóa khuyến mãi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            @if (ViewBag.IsValid != null && (bool)ViewBag.IsValid)
+            {
+                <div class="card mt-3 border-success">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                        <p class="mb-0"><strong>Khuyến mãi hợp lệ</strong></p>
+                        <small class="text-muted">Có thể sử dụng ngay</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card mt-3 border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-2"></i>
+                        <p class="mb-0"><strong>Khuyến mãi không hợp lệ</strong></p>
+                        <small class="text-muted">Không thể sử dụng</small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,395 @@
+@{
+    ViewBag.Title = "Đánh giá sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .review-section {
+        padding: 40px 0;
+        background: #f8f9fa;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .review-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .review-user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #6c757d;
+    }
+
+    .review-rating {
+        color: #ffc107;
+        font-size: 18px;
+    }
+
+    .review-images {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .review-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .review-image:hover {
+        transform: scale(1.05);
+    }
+
+    .review-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .helpful-btn {
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.2s;
+    }
+
+    .helpful-btn:hover {
+        background: #f8f9fa;
+        color: #495057;
+    }
+
+    .helpful-btn.active {
+        color: #28a745;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .rating-breakdown {
+        margin-top: 20px;
+    }
+
+    .rating-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .rating-bar-label {
+        width: 80px;
+        font-size: 14px;
+    }
+
+    .rating-bar-progress {
+        flex: 1;
+        height: 25px;
+        background: #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .rating-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ffc107, #ff9800);
+        transition: width 0.3s;
+    }
+</style>
+
+<div class="review-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Details", "Product", new { id = ViewBag.Product.Id })">@ViewBag.Product.ProductName</a></li>
+                        <li class="breadcrumb-item active">Đánh giá</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Statistics Sidebar -->
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h4 class="mb-4">Đánh giá sản phẩm</h4>
+                    
+                    @if (ViewBag.Statistics != null)
+                    {
+                        var stats = ViewBag.Statistics;
+                        
+                        <div class="text-center mb-4">
+                            <div class="display-4 fw-bold text-warning">@stats.AverageRating.ToString("F1")</div>
+                            <div class="review-rating mb-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fas fa-star @(i <= Math.Round(stats.AverageRating) ? "" : "text-muted")"></i>
+                                }
+                            </div>
+                            <p class="text-muted mb-0">Dựa trên @stats.TotalReviews đánh giá</p>
+                        </div>
+
+                        <div class="rating-breakdown">
+                            @if (stats.RatingDistribution != null)
+                            {
+                                var dist = stats.RatingDistribution as System.Collections.Generic.Dictionary<int, int>;
+                                int total = dist.Values.Sum();
+                                
+                                @for (int rating = 5; rating >= 1; rating--)
+                                {
+                                    int count = dist.ContainsKey(rating) ? dist[rating] : 0;
+                                    double percentage = total > 0 ? (count * 100.0 / total) : 0;
+                                    
+                                    <div class="rating-bar">
+                                        <div class="rating-bar-label">
+                                            @rating <i class="fas fa-star text-warning"></i>
+                                        </div>
+                                        <div class="rating-bar-progress">
+                                            <div class="rating-bar-fill" style="width: @percentage%"></div>
+                                        </div>
+                                        <div style="width: 50px; text-align: right; font-size: 14px;">
+                                            @count
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>@stats.VerifiedPurchaseCount</strong>
+                                <br />
+                                <small class="text-muted">Đã mua hàng</small>
+                            </div>
+                            <div>
+                                <strong>@stats.ReviewsWithImagesCount</strong>
+                                <br />
+                                <small class="text-muted">Có ảnh</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="stats-card">
+                        <a href="@Url.Action("Create", "Review", new { productId = ViewBag.Product.Id })" 
+                           class="btn btn-primary w-100">
+                            <i class="fas fa-star me-2"></i>Viết đánh giá
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Reviews List -->
+            <div class="col-md-8">
+                <!-- Sort Options -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">
+                        @if (ViewBag.Reviews != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reviews).Any())
+                        {
+                            <span>@((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reviews).Count() đánh giá</span>
+                        }
+                        else
+                        {
+                            <span>Chưa có đánh giá</span>
+                        }
+                    </h5>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Product", new { productId = ViewBag.Product.Id, sortBy = "Newest" })" 
+                           class="btn btn-sm @(ViewBag.SortBy == "Newest" ? "btn-primary" : "btn-outline-secondary")">
+                            Mới nhất
+                        </a>
+                        <a href="@Url.Action("Product", new { productId = ViewBag.Product.Id, sortBy = "Helpful" })" 
+                           class="btn btn-sm @(ViewBag.SortBy == "Helpful" ? "btn-primary" : "btn-outline-secondary")">
+                            Hữu ích nhất
+                        </a>
+                        <a href="@Url.Action("Product", new { productId = ViewBag.Product.Id, sortBy = "Highest" })" 
+                           class="btn btn-sm @(ViewBag.SortBy == "Highest" ? "btn-primary" : "btn-outline-secondary")">
+                            Điểm cao
+                        </a>
+                        <a href="@Url.Action("Product", new { productId = ViewBag.Product.Id, sortBy = "Lowest" })" 
+                           class="btn btn-sm @(ViewBag.SortBy == "Lowest" ? "btn-primary" : "btn-outline-secondary")">
+                            Điểm thấp
+                        </a>
+                    </div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (ViewBag.Reviews != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reviews).Any())
+                {
+                    @foreach (var review in ViewBag.Reviews)
+                    {
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-user">
+                                    <div class="review-user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <strong>@review.User.Username</strong>
+                                        @if (review.IsVerifiedPurchase)
+                                        {
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle"></i> Đã mua hàng
+                                            </span>
+                                        }
+                                        <br />
+                                        <small class="text-muted">@review.CreatedDate.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                </div>
+                                <div class="review-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= review.Rating ? "" : "text-muted")"></i>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(review.Title))
+                            {
+                                <h6 class="mb-2">@review.Title</h6>
+                            }
+
+                            <p class="mb-0">@review.ReviewText</p>
+
+                            @if (review.ReviewImages != null && review.ReviewImages.Count > 0)
+                            {
+                                <div class="review-images">
+                                    @foreach (var image in review.ReviewImages)
+                                    {
+                                        <img src="@image.ImageUrl" alt="Review image" class="review-image" 
+                                             onclick="window.open('@image.ImageUrl', '_blank')" />
+                                    }
+                                </div>
+                            }
+
+                            <div class="review-actions">
+                                <button class="helpful-btn" onclick="voteHelpful(@review.Id, true)">
+                                    <i class="fas fa-thumbs-up"></i> Hữu ích (@review.HelpfulCount)
+                                </button>
+                                <button class="helpful-btn" onclick="voteHelpful(@review.Id, false)">
+                                    <i class="fas fa-thumbs-down"></i> Không hữu ích (@review.NotHelpfulCount)
+                                </button>
+                                @if (User.Identity.IsAuthenticated && Session["UserId"] != null && (int)Session["UserId"] == review.UserId)
+                                {
+                                    <a href="@Url.Action("Edit", "Review", new { id = review.Id })" class="text-muted">
+                                        <i class="fas fa-edit"></i> Chỉnh sửa
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Pagination -->
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                                {
+                                    <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Product", new { productId = ViewBag.Product.Id, sortBy = ViewBag.SortBy, page = i })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h5>Chưa có đánh giá nào</h5>
+                        <p class="text-muted">Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="@Url.Action("Create", "Review", new { productId = ViewBag.Product.Id })" class="btn btn-primary">
+                                <i class="fas fa-star me-2"></i>Viết đánh giá
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function voteHelpful(reviewId, isHelpful) {
+        $.ajax({
+            url: '@Url.Action("VoteHelpful", "Review")',
+            type: 'POST',
+            data: {
+                id: reviewId,
+                isHelpful: isHelpful
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi vote');
+            }
+        });
+    }
+</script>
+

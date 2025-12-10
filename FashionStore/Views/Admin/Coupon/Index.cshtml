@@ -1,0 +1,269 @@
+@{
+    ViewBag.Title = "Quản lý mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* ===============================
+       TABLE WIDTH + CẤU TRÚC
+       =============================== */
+    .coupon-table table {
+        width: 100%;              /* full khung */
+        min-width: 1000px;        /* chỉ tràn trên màn hẹp */
+        table-layout: auto;
+    }
+
+    .coupon-table td,
+    .coupon-table th {
+        vertical-align: middle;
+        white-space: normal;      /* cho phép xuống dòng để gọn hơn */
+        padding: 8px 10px;
+    }
+
+    .coupon-table .desc {
+        white-space: normal;
+        max-width: 220px;
+        font-size: 12px;
+        display: block;
+    }
+
+    /* ===============================
+       FIX QUAN TRỌNG !!!
+       Không được ẩn scroll
+       =============================== */
+    .admin-card {
+        overflow: visible;   /* bỏ hidden */
+    }
+
+    /* ===============================
+       SCROLL NGANG GỌN – ĐẸP
+       =============================== */
+    .scroll-x {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+
+        /* Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: #c5ccd6 #f1f3f5;
+    }
+
+    /* Webkit scrollbars (Chrome, Edge, Safari) */
+    .scroll-x::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .scroll-x::-webkit-scrollbar-track {
+        background: #f1f3f5;
+        border-radius: 10px;
+    }
+
+    .scroll-x::-webkit-scrollbar-thumb {
+        background: #c5ccd6;
+        border-radius: 10px;
+    }
+
+    /* ===============================
+       RESPONSIVE
+       =============================== */
+    @@media (max-width: 1400px) {
+        .coupon-table table { font-size: 12px; min-width: 1000px; }
+        .coupon-table .desc { max-width: 180px; }
+        .coupon-table .badge { font-size: 11px; }
+        .coupon-table .btn { padding: 6px 8px; }
+    }
+
+    @@media (max-width: 1200px) {
+        .coupon-table table { font-size: 11.5px; min-width: 900px; }
+        .coupon-table .desc { max-width: 150px; }
+    }
+
+    @@media (max-width: 992px) {
+        .coupon-table table { font-size: 11px; min-width: 820px; }
+        .coupon-table .desc { max-width: 140px; }
+        .coupon-table .btn { padding: 5px 7px; }
+    }
+
+    @@media (max-width: 768px) {
+        .coupon-table table { font-size: 10.5px; min-width: 760px; }
+        .coupon-table td,
+        .coupon-table th { white-space: normal; }
+        .coupon-table .desc { max-width: 100%; }
+    }
+</style>
+
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-ticket-alt me-2"></i>Quản lý mã giảm giá
+        </h5>
+        <a href="@Url.Action("Create", "AdminCoupon")" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Thêm mã giảm giá mới
+        </a>
+    </div>
+
+    @if (ViewBag.Coupons != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Coupons).Any())
+    {
+        <div class="scroll-x">
+            <div class="table-wrapper coupon-table ">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã</th>
+                            <th>Chi tiết</th>
+                            <th>Loại</th>
+                            <th>Giảm giá</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var coupon in ViewBag.Coupons)
+                        {
+                            var now = DateTime.Now;
+                            bool isActive = coupon.IsActive && coupon.StartDate <= now && coupon.EndDate >= now;
+                            bool isExpired = coupon.EndDate < now;
+
+                            <tr>
+                                <td><strong>#@coupon.Id</strong></td>
+                                <td><strong class="text-primary">@coupon.Code</strong></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#coupon-detail-@coupon.Id"
+                                            aria-expanded="false" aria-controls="coupon-detail-@coupon.Id">
+                                        <i class="fas fa-eye me-1"></i>Xem
+                                    </button>
+                                </td>
+
+                                <td><span class="badge bg-info">@coupon.DiscountType</span></td>
+
+                                <td>
+                                    <div class="d-flex flex-column small" style="min-width:140px;">
+                                        @if (coupon.DiscountPercentage != null)
+                                        {
+                                            <span class="text-success">@coupon.DiscountPercentage%</span>
+                                        }
+                                        else if (coupon.DiscountAmount != null)
+                                        {
+                                            <span class="text-success">@coupon.DiscountAmount.ToString("N0") đ</span>
+                                        }
+
+                                        @if (coupon.MinimumOrderAmount != null)
+                                        {
+                                            <span class="text-muted">Đơn tối thiểu: @coupon.MinimumOrderAmount.ToString("N0") đ</span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success">Đang hoạt động</span>
+                                    }
+                                    else if (isExpired)
+                                    {
+                                        <span class="badge bg-secondary">Hết hạn</span>
+                                    }
+                                    else if (!coupon.IsActive)
+                                    {
+                                        <span class="badge bg-warning">Tạm dừng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">Chưa bắt đầu</span>
+                                    }
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Details", new { id = coupon.Id })" class="btn btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = coupon.Id })" class="btn btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="@Url.Action("Delete", new { id = coupon.Id })" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger"
+                                                    onclick="return confirm('Bạn có chắc muốn xóa mã giảm giá này?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="collapse bg-light" id="coupon-detail-@coupon.Id">
+                                <td colspan="7" class="py-3">
+                                    <div class="row g-3 small">
+                                        <div class="col-md-4">
+                                            <strong>Tên / Mô tả</strong>
+                                            <div class="mt-1">
+                                                <div class="fw-semibold">@((coupon.Name ?? coupon.Code))</div>
+                                                @if (!string.IsNullOrEmpty(coupon.Description))
+                                                {
+                                                    <div class="text-muted">
+                                                        @coupon.Description
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Thời gian</strong>
+                                            <div class="mt-1 text-muted">
+                                                <div>Bắt đầu: @coupon.StartDate.ToString("dd/MM/yyyy")</div>
+                                                <div>Kết thúc: @coupon.EndDate.ToString("dd/MM/yyyy")</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Sử dụng</strong>
+                                            <div class="mt-1 text-muted">
+                                                @if (coupon.UsageLimit != null)
+                                                {
+                                                    <div>@coupon.UsedCount / @coupon.UsageLimit</div>
+                                                }
+                                                else
+                                                {
+                                                    <div>@coupon.UsedCount lượt</div>
+                                                }
+                                                @if (coupon.UsageLimitPerUser != null)
+                                                {
+                                                    <div>@coupon.UsageLimitPerUser / user</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Pagination *@
+        if (ViewBag.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <p class="text-muted">Chưa có mã giảm giá nào.</p>
+        </div>
+    }
+</div>

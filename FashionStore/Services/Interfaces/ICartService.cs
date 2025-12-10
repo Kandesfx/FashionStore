@@ -8,7 +8,7 @@ namespace FashionStore.Services.Interfaces
     {
         Cart GetCartByUserId(int userId);
         Cart CreateCart(int userId);
-        void AddToCart(int userId, int productId, int quantity);
+        void AddToCart(int userId, int productId, int quantity, int? productVariantId = null);
         void UpdateCartItem(int cartItemId, int quantity);
         void RemoveCartItem(int cartItemId);
         void ClearCart(int userId);

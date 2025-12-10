@@ -192,6 +192,16 @@ namespace FashionStore.Services.Implementations
             _productRepository.Update(product);
             _unitOfWork.Complete();
         }
+
+        public IEnumerable<ProductVariant> GetVariantsByProductId(int productId)
+        {
+            return _unitOfWork.ProductVariants.GetByProductId(productId);
+        }
+
+        public ProductVariant GetVariantById(int variantId)
+        {
+            return _unitOfWork.ProductVariants.GetById(variantId);
+        }
     }
 }
 

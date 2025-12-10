@@ -1,0 +1,125 @@
+@{
+    ViewBag.Title = "Xuất kho";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-arrow-up me-2"></i>Xuất kho
+        </h5>
+        <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @using (Html.BeginForm("Export", "AdminInventory", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label">Sản phẩm <span class="text-danger">*</span></label>
+                    @Html.DropDownList("productId", new SelectList(ViewBag.Products ?? new List<dynamic>(), "Id", "ProductName"), 
+                        "Chọn sản phẩm", new { @class = "form-select", required = "required", id = "productSelect" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tồn kho hiện tại</label>
+                    <input type="text" id="currentStock" class="form-control" readonly />
+                    <small class="text-muted">Số lượng tồn kho sẽ được cập nhật sau khi chọn sản phẩm</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số lượng xuất <span class="text-danger">*</span></label>
+                    <input type="number" name="quantity" class="form-control" min="1" required id="quantityInput" />
+                    <small class="text-muted">Nhập số lượng sản phẩm cần xuất khỏi kho</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Ghi chú về lý do xuất kho (tùy chọn)"></textarea>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Lưu ý: Số lượng xuất không được vượt quá tồn kho hiện tại.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Xác nhận xuất kho
+                    </button>
+                    <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productSelect = document.getElementById('productSelect');
+        const currentStock = document.getElementById('currentStock');
+        const quantityInput = document.getElementById('quantityInput');
+
+        if (productSelect && currentStock) {
+            productSelect.addEventListener('change', function() {
+                const productId = this.value;
+                if (productId) {
+                    currentStock.value = 'Đang tải...';
+                    
+                    // Get current stock via AJAX
+                    $.ajax({
+                        url: '@Url.Action("GetProductStock", "AdminInventory")',
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function(response) {
+                            if (response && response.stock !== undefined) {
+                                currentStock.value = response.stock + ' sản phẩm';
+                                if (quantityInput) {
+                                    quantityInput.setAttribute('max', response.stock);
+                                }
+                            } else {
+                                currentStock.value = 'Không xác định';
+                            }
+                        },
+                        error: function() {
+                            currentStock.value = 'Lỗi khi tải dữ liệu';
+                        }
+                    });
+                } else {
+                    currentStock.value = '';
+                    if (quantityInput) {
+                        quantityInput.removeAttribute('max');
+                    }
+                }
+            });
+
+            // Validate quantity on input
+            if (quantityInput) {
+                quantityInput.addEventListener('input', function() {
+                    const maxStock = parseInt(this.getAttribute('max') || '999999');
+                    const quantity = parseInt(this.value || '0');
+                    if (quantity > maxStock) {
+                        this.setCustomValidity('Số lượng xuất không được vượt quá tồn kho hiện tại (' + maxStock + ')');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        }
+    });
+</script>
+

@@ -9,11 +9,13 @@ namespace FashionStore.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly IProductVariantService _productVariantService;
 
-        public ProductController(IProductService productService, ICategoryService categoryService)
+        public ProductController(IProductService productService, ICategoryService categoryService, IProductVariantService productVariantService)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _productVariantService = productVariantService;
         }
 
         // GET: Product
@@ -71,6 +73,35 @@ namespace FashionStore.Controllers
                 return HttpNotFound();
             }
 
+            // Get product variants (size, color)
+            var variants = _productVariantService.GetByProductId(id).Where(v => v.IsActive).ToList();
+            
+            // Create anonymous objects for JSON serialization (avoid circular reference)
+            var variantsForJson = variants.Select(v => new
+            {
+                Id = v.Id,
+                Size = v.Size,
+                Color = v.Color,
+                SKU = v.SKU,
+                Price = v.Price,
+                Stock = v.Stock,
+                ImageUrl = v.ImageUrl,
+                IsActive = v.IsActive
+            }).ToList();
+            
+            // Get unique sizes and colors
+            var sizes = variants.Where(v => !string.IsNullOrEmpty(v.Size))
+                               .Select(v => v.Size)
+                               .Distinct()
+                               .OrderBy(s => s)
+                               .ToList();
+            
+            var colors = variants.Where(v => !string.IsNullOrEmpty(v.Color))
+                                .Select(v => v.Color)
+                                .Distinct()
+                                .OrderBy(c => c)
+                                .ToList();
+
             // Get related products (same category)
             var relatedProducts = _productService.GetProductsByCategory(product.CategoryId)
                 .Where(p => p.Id != id)
@@ -78,6 +109,9 @@ namespace FashionStore.Controllers
                 .ToList();
 
             ViewBag.RelatedProducts = relatedProducts;
+            ViewBag.Variants = variantsForJson; // Use anonymous objects instead of entities
+            ViewBag.Sizes = sizes;
+            ViewBag.Colors = colors;
             return View(product);
         }
 

@@ -4,6 +4,31 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@functions {
+    public string GetColorCode(string colorName)
+    {
+        if (string.IsNullOrEmpty(colorName)) return "#ccc";
+        
+        var colorMap = new Dictionary<string, string>
+        {
+            { "Đỏ", "#e74c3c" },
+            { "Xanh", "#3498db" },
+            { "Xanh lá", "#2ecc71" },
+            { "Vàng", "#f1c40f" },
+            { "Cam", "#e67e22" },
+            { "Tím", "#9b59b6" },
+            { "Hồng", "#e91e63" },
+            { "Đen", "#1a1a1a" },
+            { "Trắng", "#ffffff" },
+            { "Xám", "#95a5a6" },
+            { "Nâu", "#8b4513" },
+            { "Be", "#f5deb3" }
+        };
+        
+        return colorMap.ContainsKey(colorName) ? colorMap[colorName] : "#ccc";
+    }
+}
+
 <style>
     .product-detail-section {
         padding: 60px 0;
@@ -277,6 +302,65 @@
 
     .quantity-input:focus {
         outline: none;
+    }
+
+    /* Variant Selector */
+    .variant-selector {
+        margin-bottom: 25px;
+    }
+
+    .variant-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .variant-btn {
+        padding: 10px 20px;
+        border: 2px solid #e5e5e5;
+        background: white;
+        color: #1a1a1a;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    .variant-btn:hover {
+        border-color: #c9a063;
+        color: #c9a063;
+        transform: translateY(-2px);
+    }
+
+    .variant-btn.selected {
+        background: #c9a063;
+        color: white;
+        border-color: #c9a063;
+    }
+
+    .variant-btn.color-btn {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .variant-btn.color-btn::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+    }
+
+    .variant-btn.color-btn.selected::before {
+        border-color: white;
     }
 
     /* Action Buttons */
@@ -699,7 +783,66 @@
                         @(Model.Description ?? "Sản phẩm thời trang cao cấp với chất liệu tốt, thiết kế tinh tế và hiện đại. Phù hợp cho nhiều dịp khác nhau, mang đến sự tự tin và phong cách cho người mặc.")
                     </p>
 
-                    @if (Model.Stock > 0)
+                    @{
+                        var hasVariants = ViewBag.Variants != null && ((System.Collections.IEnumerable)ViewBag.Variants).Cast<object>().Any();
+                        var hasSizes = ViewBag.Sizes != null && ((System.Collections.Generic.List<string>)ViewBag.Sizes).Any();
+                        var hasColors = ViewBag.Colors != null && ((System.Collections.Generic.List<string>)ViewBag.Colors).Any();
+                    }
+                    
+                    @if (hasVariants)
+                    {
+                        @* Size Selector *@
+                        if (hasSizes)
+                        {
+                            <div class="variant-selector mb-4">
+                                <label class="quantity-label">Kích cỡ:</label>
+                                <div class="variant-options">
+                                    @foreach (var size in ViewBag.Sizes)
+                                    {
+                                        <button type="button" class="variant-btn" data-variant-type="size" data-value="@size" onclick="selectVariant('size', '@size', this)">
+                                            @size
+                                        </button>
+                                    }
+                                </div>
+                                <input type="hidden" id="selectedSize" value="" />
+                            </div>
+                        }
+
+                        @* Color Selector *@
+                        if (hasColors)
+                        {
+                            <div class="variant-selector mb-4">
+                                <label class="quantity-label">Màu sắc:</label>
+                                <div class="variant-options">
+                                    @foreach (var color in ViewBag.Colors)
+                                    {
+                                        <button type="button" class="variant-btn color-btn" data-variant-type="color" data-value="@color" onclick="selectVariant('color', '@color', this)" style="background-color: @GetColorCode(color);">
+                                            @color
+                                        </button>
+                                    }
+                                </div>
+                                <input type="hidden" id="selectedColor" value="" />
+                            </div>
+                        }
+
+                        <input type="hidden" id="selectedVariantId" value="" />
+                        <div id="variantInfo" class="mb-3" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="variantStockInfo"></span>
+                            </div>
+                        </div>
+                    }
+
+                    @{
+                        var availableStock = Model.Stock;
+                        if (ViewBag.Variants != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Variants).Any())
+                        {
+                            // Stock sẽ được cập nhật động khi chọn variant
+                        }
+                    }
+
+                    @if (Model.Stock > 0 || (ViewBag.Variants != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Variants).Any()))
                     {
                         <div class="quantity-selector">
                             <label class="quantity-label">Số lượng:</label>
@@ -708,8 +851,8 @@
                                     <button class="quantity-btn" onclick="decreaseQuantity()">
                                         <i class="fas fa-minus"></i>
                                     </button>
-                                    <input type="number" id="quantity" value="1" min="1" max="@Model.Stock" class="quantity-input" readonly>
-                                    <button class="quantity-btn" onclick="increaseQuantity(@Model.Stock)">
+                                    <input type="number" id="quantity" value="1" min="1" max="@availableStock" class="quantity-input" readonly>
+                                    <button class="quantity-btn" onclick="increaseQuantity(@availableStock)">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
@@ -717,7 +860,7 @@
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn-add-cart" onclick="addToCart(@Model.Id)">
+                            <button class="btn-add-cart" onclick="addToCart(@Model.Id)" id="addToCartBtn">
                                 <i class="fas fa-shopping-cart"></i>
                                 Thêm Vào Giỏ Hàng
                             </button>
@@ -841,53 +984,203 @@
             }
         }
 
+        // Variant data
+        var variants = @Html.Raw(ViewBag.Variants != null ? System.Web.Helpers.Json.Encode(ViewBag.Variants) : "[]");
+        var baseStock = @Model.Stock;
+
+        // Select variant (size/color)
+        function selectVariant(type, value, buttonElement) {
+            try {
+                // Update selected value
+                if (type === 'size') {
+                    document.getElementById('selectedSize').value = value;
+                    // Remove selected class from all size buttons
+                    document.querySelectorAll('[data-variant-type="size"]').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    // Add selected class to clicked button
+                    if (buttonElement) {
+                        buttonElement.classList.add('selected');
+                    }
+                } else if (type === 'color') {
+                    document.getElementById('selectedColor').value = value;
+                    // Remove selected class from all color buttons
+                    document.querySelectorAll('[data-variant-type="color"]').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    // Add selected class to clicked button
+                    if (buttonElement) {
+                        buttonElement.classList.add('selected');
+                    }
+                }
+
+                // Find matching variant
+                updateVariantSelection();
+            } catch (error) {
+                console.error('Error selecting variant:', error);
+            }
+        }
+
+        function updateVariantSelection() {
+            var selectedSize = document.getElementById('selectedSize').value;
+            var selectedColor = document.getElementById('selectedColor').value;
+            var variantId = '';
+            var variantStock = baseStock;
+            var variantPrice = @Model.Price;
+
+            // Find variant that matches selected size and color
+            if (variants && variants.length > 0) {
+                var matchingVariant = variants.find(function(v) {
+                    var sizeMatch = !selectedSize || v.Size === selectedSize;
+                    var colorMatch = !selectedColor || v.Color === selectedColor;
+                    return sizeMatch && colorMatch && v.IsActive;
+                });
+
+                if (matchingVariant) {
+                    variantId = matchingVariant.Id;
+                    variantStock = matchingVariant.Stock || 0;
+                    if (matchingVariant.Price) {
+                        variantPrice = matchingVariant.Price;
+                    }
+                }
+            }
+
+            // Update hidden field
+            document.getElementById('selectedVariantId').value = variantId;
+
+            // Update stock info
+            var variantInfoDiv = document.getElementById('variantInfo');
+            var stockInfoSpan = document.getElementById('variantStockInfo');
+            var quantityInput = document.getElementById('quantity');
+            var maxStock = variantStock || baseStock;
+
+            if (variantId) {
+                variantInfoDiv.style.display = 'block';
+                if (variantStock > 0) {
+                    stockInfoSpan.innerHTML = 'Tồn kho: ' + variantStock + ' sản phẩm';
+                    stockInfoSpan.parentElement.className = 'alert alert-info';
+                } else {
+                    stockInfoSpan.innerHTML = 'Biến thể này đã hết hàng';
+                    stockInfoSpan.parentElement.className = 'alert alert-warning';
+                }
+            } else {
+                variantInfoDiv.style.display = 'none';
+            }
+
+            // Update quantity max
+            quantityInput.max = maxStock;
+            if (parseInt(quantityInput.value) > maxStock) {
+                quantityInput.value = maxStock;
+            }
+
+            // Update price if variant has different price
+            if (variantId && variantPrice !== @Model.Price) {
+                // You can update price display here if needed
+            }
+        }
+
         // Add to cart
         function addToCart(productId) {
-            var quantity = parseInt(document.getElementById('quantity').value);
+            try {
+                var quantityInput = document.getElementById('quantity');
+                var quantity = parseInt(quantityInput.value) || 1;
+                var variantIdInput = document.getElementById('selectedVariantId');
+                var variantId = variantIdInput ? variantIdInput.value : '';
+                var selectedSizeInput = document.getElementById('selectedSize');
+                var selectedSize = selectedSizeInput ? selectedSizeInput.value : '';
+                var selectedColorInput = document.getElementById('selectedColor');
+                var selectedColor = selectedColorInput ? selectedColorInput.value : '';
 
-            $.ajax({
-                url: '/Cart/AddToCart',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    productId: productId,
-                    quantity: quantity
-                },
-                success: function (response) {
-                    if (response.success) {
-                        // Show toast notification
-                        var toast = document.getElementById('cartToast');
-                        toast.classList.add('show');
+                // Validate quantity
+                if (isNaN(quantity) || quantity < 1) {
+                    alert('Số lượng không hợp lệ');
+                    return;
+                }
 
-                        // Update cart badge if exists
-                        if (typeof updateCartBadge === 'function' && response.cartCount) {
-                            updateCartBadge(response.cartCount);
-                        }
-
-                        // Hide toast after 3 seconds
-                        setTimeout(function () {
-                            toast.classList.remove('show');
-                        }, 3000);
-                    } else {
-                        // Nếu chưa đăng nhập, điều hướng tới trang đăng nhập
-                        if (response.message && response.message.toLowerCase().indexOf('đăng nhập') >= 0) {
-                            var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                            window.location.href = '/Account/Login?returnUrl=' + returnUrl;
-                            return;
-                        }
-                        alert(response.message || 'Có lỗi xảy ra. Vui lòng thử lại!');
-                    }
-                },
-                error: function (xhr) {
-                    // Nếu server trả về redirect hoặc unauthorized, đưa về trang đăng nhập
-                    if (xhr.status === 401 || xhr.status === 302) {
-                        var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                        window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                // Check if variants are required but not selected
+                if (variants && variants.length > 0) {
+                    var hasSizes = @((ViewBag.Sizes != null && ((System.Collections.Generic.List<string>)ViewBag.Sizes).Any()) ? "true" : "false");
+                    var hasColors = @((ViewBag.Colors != null && ((System.Collections.Generic.List<string>)ViewBag.Colors).Any()) ? "true" : "false");
+                    
+                    if (hasSizes && !selectedSize) {
+                        alert('Vui lòng chọn kích cỡ');
                         return;
                     }
-                    alert('Có lỗi xảy ra. Vui lòng thử lại!');
+                    if (hasColors && !selectedColor) {
+                        alert('Vui lòng chọn màu sắc');
+                        return;
+                    }
+
+                    // Check if variant is selected when variants exist
+                    if (!variantId) {
+                        alert('Vui lòng chọn đầy đủ thông tin sản phẩm (kích cỡ và màu sắc)');
+                        return;
+                    }
                 }
-            });
+
+                // Disable button during request
+                var addToCartBtn = document.getElementById('addToCartBtn');
+                if (addToCartBtn) {
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
+                }
+
+                $.ajax({
+                    url: '/Cart/AddToCart',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        productId: productId,
+                        quantity: quantity,
+                        productVariantId: variantId || null
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Show toast notification
+                            var toast = document.getElementById('cartToast');
+                            if (toast) {
+                                toast.classList.add('show');
+                                // Hide toast after 3 seconds
+                                setTimeout(function () {
+                                    toast.classList.remove('show');
+                                }, 3000);
+                            }
+
+                            // Update cart badge if exists
+                            if (typeof updateCartBadge === 'function' && response.cartCount) {
+                                updateCartBadge(response.cartCount);
+                            } else if (response.cartCount) {
+                                // Try to update cart count in header if exists
+                                var cartCountElement = document.querySelector('.cart-count, #cartCount');
+                                if (cartCountElement) {
+                                    cartCountElement.textContent = response.cartCount;
+                                }
+                            }
+                        } else {
+                            alert(response.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        var errorMessage = 'Có lỗi xảy ra khi thêm vào giỏ hàng';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(errorMessage);
+                    },
+                    complete: function () {
+                        // Re-enable button
+                        if (addToCartBtn) {
+                            addToCartBtn.disabled = false;
+                            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Thêm Vào Giỏ Hàng';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        }
         }
 
         // Wishlist button

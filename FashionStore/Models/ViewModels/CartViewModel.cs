@@ -22,6 +22,11 @@ namespace FashionStore.Models.ViewModels
         public decimal SubTotal { get; set; }
         public int Stock { get; set; }
         
+        // Variant info
+        public int? ProductVariantId { get; set; }
+        public string Size { get; set; }
+        public string Color { get; set; }
+        
         public decimal FinalPrice => DiscountPrice ?? Price;
     }
 }

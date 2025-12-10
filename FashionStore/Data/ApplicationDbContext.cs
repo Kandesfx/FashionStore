@@ -435,10 +435,17 @@ namespace FashionStore.Data
                 .HasForeignKey(ci => ci.ProductId)
                 .WillCascadeOnDelete(false);
 
-            // Unique constraint: One product per cart
+            // CartItem - ProductVariant relationship (optional)
             modelBuilder.Entity<CartItem>()
-                .HasIndex(ci => new { ci.CartId, ci.ProductId })
-                .IsUnique();
+                .HasOptional(ci => ci.ProductVariant)
+                .WithMany()
+                .HasForeignKey(ci => ci.ProductVariantId)
+                .WillCascadeOnDelete(false);
+
+            // Unique constraint: One product (with same variant) per cart
+            modelBuilder.Entity<CartItem>()
+                .HasIndex(ci => new { ci.CartId, ci.ProductId, ci.ProductVariantId })
+                .HasName("IX_CartItems_CartId_ProductId_ProductVariantId");
         }
 
         private void ConfigureIndexes(DbModelBuilder modelBuilder)

@@ -1,59 +1,255 @@
 @{
     ViewBag.Title = "Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var stats = ViewBag.DashboardStats as FashionStore.Models.ViewModels.DashboardStatisticsViewModel;
 }
 
+@if (stats == null)
+{
+    <div class="alert alert-warning">Không thể tải dữ liệu thống kê.</div>
+    return;
+}
+
+<!-- KPI Cards -->
 <div class="stats-grid">
     <div class="stat-card primary">
         <div class="stat-icon">
             <i class="fas fa-shopping-cart"></i>
         </div>
-        <div class="stat-value">@(ViewBag.Statistics?.TotalOrders ?? 0)</div>
-        <div class="stat-label">Tổng đơn hàng</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.TotalOrders</div>
+            <div class="stat-label">Tổng đơn hàng</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> @stats.ThisMonthOrders tháng này
+            </div>
+        </div>
     </div>
 
     <div class="stat-card success">
         <div class="stat-icon">
             <i class="fas fa-dollar-sign"></i>
         </div>
-        <div class="stat-value">@((ViewBag.Statistics?.TotalRevenue ?? 0).ToString("N0")) đ</div>
-        <div class="stat-label">Tổng doanh thu</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.TotalRevenue.ToString("N0") đ</div>
+            <div class="stat-label">Tổng doanh thu</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> @stats.ThisMonthRevenue.ToString("N0") đ tháng này
+            </div>
+        </div>
     </div>
 
     <div class="stat-card warning">
         <div class="stat-icon">
             <i class="fas fa-clock"></i>
         </div>
-        <div class="stat-value">@(ViewBag.Statistics?.PendingOrders ?? 0)</div>
-        <div class="stat-label">Đơn chờ xử lý</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.PendingOrders</div>
+            <div class="stat-label">Đơn chờ xử lý</div>
+            <div class="stat-change">
+                <i class="fas fa-info-circle"></i> Cần xử lý
+            </div>
+        </div>
     </div>
 
     <div class="stat-card info">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
-        <div class="stat-value">@(ViewBag.Statistics?.CompletedOrders ?? 0)</div>
-        <div class="stat-label">Đơn hoàn thành</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.CompletedOrders</div>
+            <div class="stat-label">Đơn hoàn thành</div>
+            <div class="stat-change positive">
+                <i class="fas fa-check"></i> @stats.TodayOrders hôm nay
+            </div>
+        </div>
     </div>
 
     <div class="stat-card primary">
         <div class="stat-icon">
             <i class="fas fa-box"></i>
         </div>
-        <div class="stat-value">@(ViewBag.TotalProducts ?? 0)</div>
-        <div class="stat-label">Tổng sản phẩm</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.TotalProducts</div>
+            <div class="stat-label">Tổng sản phẩm</div>
+            <div class="stat-change">
+                <i class="fas fa-info-circle"></i> @stats.ActiveProducts đang hoạt động
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card danger">
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.LowStockProducts</div>
+            <div class="stat-label">Sản phẩm sắp hết</div>
+            <div class="stat-change negative">
+                <i class="fas fa-arrow-down"></i> Cần nhập hàng
+            </div>
+        </div>
     </div>
 
     <div class="stat-card success">
         <div class="stat-icon">
             <i class="fas fa-users"></i>
         </div>
-        <div class="stat-value">@(ViewBag.TotalUsers ?? 0)</div>
-        <div class="stat-label">Tổng người dùng</div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.TotalUsers</div>
+            <div class="stat-label">Tổng người dùng</div>
+            <div class="stat-change positive">
+                <i class="fas fa-user-plus"></i> +@stats.NewUsersThisMonth tháng này
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card info">
+        <div class="stat-icon">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@stats.AverageRating.ToString("F1")</div>
+            <div class="stat-label">Đánh giá trung bình</div>
+            <div class="stat-change">
+                <i class="fas fa-comments"></i> @stats.TotalReviews đánh giá
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="admin-card">
+<!-- Charts Row -->
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-8">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line me-2"></i>Doanh thu theo tháng
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-pie me-2"></i>Đơn hàng theo trạng thái
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="orderStatusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Statistics Row -->
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-fire me-2"></i>Sản phẩm bán chạy
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (stats.TopSellingProducts != null && stats.TopSellingProducts.Any())
+                {
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Đã bán</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in stats.TopSellingProducts)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center;">
+                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                {
+                                                    <img src="@product.ImageUrl" alt="@product.ProductName" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px; border-radius: 4px;" />
+                                                }
+                                                <span>@product.ProductName</span>
+                                            </div>
+                                        </td>
+                                        <td><strong>@product.QuantitySold</strong></td>
+                                        <td><strong>@product.Revenue.ToString("N0") đ</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>Chưa có dữ liệu sản phẩm bán chạy</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-tags me-2"></i>Khuyến mãi & Coupon
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="stats-mini-grid">
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-icon" style="background: #4CAF50;">
+                            <i class="fas fa-percent"></i>
+                        </div>
+                        <div class="stat-mini-content">
+                            <div class="stat-mini-value">@stats.ActivePromotions</div>
+                            <div class="stat-mini-label">Promotion đang hoạt động</div>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-icon" style="background: #2196F3;">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="stat-mini-content">
+                            <div class="stat-mini-value">@stats.ActiveCoupons</div>
+                            <div class="stat-mini-label">Coupon đang hoạt động</div>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-icon" style="background: #FF9800;">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="stat-mini-content">
+                            <div class="stat-mini-value">@stats.CouponUsagesThisMonth</div>
+                            <div class="stat-mini-label">Lần sử dụng tháng này</div>
+                        </div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-icon" style="background: #9C27B0;">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="stat-mini-content">
+                            <div class="stat-mini-value">@stats.PendingReviews</div>
+                            <div class="stat-mini-label">Đánh giá chờ duyệt</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="admin-card" style="margin-top: 20px;">
     <div class="card-header">
         <h5 class="card-title">
             <i class="fas fa-list me-2"></i>Đơn hàng gần đây
@@ -111,3 +307,159 @@
     }
 </div>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    @* Revenue Chart *@
+    var revenueData = @Html.Raw(System.Web.Helpers.Json.Encode(stats.RevenueByMonth ?? new List<FashionStore.Models.ViewModels.RevenueChartData>()));
+    var revenueLabels = revenueData.map(function(item) { return item.Month; });
+    var revenueValues = revenueData.map(function(item) { return item.Revenue; });
+
+    var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    var revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: revenueValues,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    @* Order Status Chart *@
+    var orderStatusData = @Html.Raw(System.Web.Helpers.Json.Encode(stats.OrdersByStatus ?? new List<FashionStore.Models.ViewModels.OrderChartData>()));
+    var orderStatusLabels = orderStatusData.map(function(item) { return item.Status; });
+    var orderStatusValues = orderStatusData.map(function(item) { return item.Count; });
+    var orderStatusColors = [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)'
+    ];
+
+    var orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    var orderStatusChart = new Chart(orderStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: orderStatusLabels,
+            datasets: [{
+                data: orderStatusValues,
+                backgroundColor: orderStatusColors,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-change {
+        font-size: 12px;
+        margin-top: 5px;
+        color: #666;
+    }
+
+    .stat-change.positive {
+        color: #4CAF50;
+    }
+
+    .stat-change.negative {
+        color: #f44336;
+    }
+
+    .stats-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .stat-mini-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .stat-mini-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        margin-right: 15px;
+    }
+
+    .stat-mini-content {
+        flex: 1;
+    }
+
+    .stat-mini-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stat-mini-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    canvas {
+        max-height: 300px;
+    }
+</style>

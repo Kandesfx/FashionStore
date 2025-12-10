@@ -591,6 +591,23 @@
                                     <a href="@Url.Action("Details", "Product", new { id = item.ProductId })" class="item-name">
                                         @item.ProductName
                                     </a>
+                                    @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
+                                    {
+                                        <div class="item-variant" style="margin-top: 5px; font-size: 13px; color: #666;">
+                                            @if (!string.IsNullOrEmpty(item.Size))
+                                            {
+                                                <span>Size: <strong>@item.Size</strong></span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Size) && !string.IsNullOrEmpty(item.Color))
+                                            {
+                                                <span> | </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Color))
+                                            {
+                                                <span>Màu: <strong>@item.Color</strong></span>
+                                            }
+                                        </div>
+                                    }
                                     <div>
                                         @if (item.DiscountPrice != null && item.DiscountPrice > 0)
                                         {

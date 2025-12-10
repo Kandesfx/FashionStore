@@ -1,0 +1,178 @@
+@{
+    ViewBag.Title = "Lịch sử tồn kho sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@if (ViewBag.Product == null)
+{
+    <div class="alert alert-danger">
+        Sản phẩm không tồn tại.
+    </div>
+    return;
+}
+
+@{
+    var product = ViewBag.Product;
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-box me-2"></i>Lịch sử tồn kho: @product.ProductName
+        </h5>
+        <div>
+            <a href="@Url.Action("Import", "AdminInventory", new { productId = product.Id })" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Nhập kho
+            </a>
+            <a href="@Url.Action("Index", "AdminInventory")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">@ViewBag.CurrentStock</h3>
+                    <p class="text-muted mb-0">Tồn kho hiện tại</p>
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.Summary != null)
+        {
+            var summary = ViewBag.Summary as System.Collections.Generic.Dictionary<string, int>;
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-success">@(summary.ContainsKey("Import") ? summary["Import"] : 0)</h3>
+                        <p class="text-muted mb-0">Tổng nhập</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-danger">@(summary.ContainsKey("Sale") ? summary["Sale"] : 0)</h3>
+                        <p class="text-muted mb-0">Tổng bán</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-info">@(summary.ContainsKey("Return") ? summary["Return"] : 0)</h3>
+                        <p class="text-muted mb-0">Tổng trả</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (ViewBag.Transactions != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Transactions).Any())
+    {
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Loại</th>
+                        <th>Số lượng</th>
+                        <th>Ghi chú</th>
+                        <th>Người thực hiện</th>
+                        <th>Ngày tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in ViewBag.Transactions)
+                    {
+                        <tr>
+                            <td><strong>#@transaction.Id</strong></td>
+                            <td>
+                                @if (transaction.TransactionType == "Import")
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-arrow-down me-1"></i>Nhập kho
+                                    </span>
+                                }
+                                else if (transaction.TransactionType == "Export")
+                                {
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-arrow-up me-1"></i>Xuất kho
+                                    </span>
+                                }
+                                else if (transaction.TransactionType == "Sale")
+                                {
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-shopping-cart me-1"></i>Bán hàng
+                                    </span>
+                                }
+                                else if (transaction.TransactionType == "Return")
+                                {
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-undo me-1"></i>Trả hàng
+                                    </span>
+                                }
+                                else if (transaction.TransactionType == "Adjustment_Increase")
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-plus me-1"></i>Điều chỉnh tăng
+                                    </span>
+                                }
+                                else if (transaction.TransactionType == "Adjustment_Decrease")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-minus me-1"></i>Điều chỉnh giảm
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <strong class="@(transaction.TransactionType == "Import" || transaction.TransactionType == "Return" || transaction.TransactionType == "Adjustment_Increase" ? "text-success" : "text-danger")">
+                                    @if (transaction.TransactionType == "Import" || transaction.TransactionType == "Return" || transaction.TransactionType == "Adjustment_Increase")
+                                    {
+                                        <span>+@transaction.Quantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span>-@transaction.Quantity</span>
+                                    }
+                                </strong>
+                            </td>
+                            <td>
+                                <small>@(string.IsNullOrEmpty(transaction.Notes) ? transaction.Reason : transaction.Notes)</small>
+                                @if (transaction.OrderId.HasValue)
+                                {
+                                    <br />
+                                    <a href="@Url.Action("Details", "AdminOrder", new { id = transaction.OrderId })" target="_blank">
+                                        <small>Đơn hàng #@transaction.OrderId</small>
+                                    </a>
+                                }
+                            </td>
+                            <td>
+                                @if (transaction.CreatedBy != null)
+                                {
+                                    <small>@transaction.CreatedBy.Username</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Hệ thống</small>
+                                }
+                            </td>
+                            <td>
+                                <small>@transaction.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Chưa có giao dịch tồn kho nào cho sản phẩm này.</p>
+        </div>
+    }
+</div>
+

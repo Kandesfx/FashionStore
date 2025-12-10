@@ -13,11 +13,13 @@ namespace FashionStore.Controllers.Admin
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly IProductVariantService _productVariantService;
 
-        public AdminProductController(IProductService productService, ICategoryService categoryService)
+        public AdminProductController(IProductService productService, ICategoryService categoryService, IProductVariantService productVariantService)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _productVariantService = productVariantService;
         }
 
         // GET: Admin/Product
@@ -80,6 +82,25 @@ namespace FashionStore.Controllers.Admin
                 };
 
                 _productService.Add(product);
+
+                // Save variants
+                if (model.Variants != null && model.Variants.Any())
+                {
+                    var variants = model.Variants
+                        .Where(v => !string.IsNullOrWhiteSpace(v.SKU) || !string.IsNullOrWhiteSpace(v.Size) || !string.IsNullOrWhiteSpace(v.Color))
+                        .Select(v => new ProductVariant
+                        {
+                            SKU = v.SKU,
+                            Size = v.Size,
+                            Color = v.Color,
+                            Price = v.Price,
+                            Stock = v.Stock,
+                            IsActive = true,
+                            CreatedDate = DateTime.Now
+                        }).ToList();
+
+                    _productVariantService.ReplaceVariants(product.Id, variants);
+                }
                 return RedirectToAction("Index");
             }
             catch (System.Exception ex)
@@ -99,6 +120,16 @@ namespace FashionStore.Controllers.Admin
                 return HttpNotFound();
             }
 
+            var variants = _productVariantService.GetByProductId(product.Id)
+                .Select(v => new ProductVariantInput
+                {
+                    SKU = v.SKU,
+                    Size = v.Size,
+                    Color = v.Color,
+                    Price = v.Price,
+                    Stock = v.Stock
+                }).ToList();
+
             var model = new ProductViewModel
             {
                 Id = product.Id,
@@ -110,7 +141,8 @@ namespace FashionStore.Controllers.Admin
                 ImageUrl = product.ImageUrl,
                 Stock = product.Stock,
                 Featured = product.Featured,
-                IsActive = product.IsActive
+                IsActive = product.IsActive,
+                Variants = variants
             };
 
             ViewBag.Categories = _categoryService.GetActiveCategories();
@@ -147,6 +179,25 @@ namespace FashionStore.Controllers.Admin
                 product.IsActive = model.IsActive;
 
                 _productService.Update(product);
+
+                // Save variants
+                if (model.Variants != null)
+                {
+                    var variants = model.Variants
+                        .Where(v => !string.IsNullOrWhiteSpace(v.SKU) || !string.IsNullOrWhiteSpace(v.Size) || !string.IsNullOrWhiteSpace(v.Color))
+                        .Select(v => new ProductVariant
+                        {
+                            SKU = v.SKU,
+                            Size = v.Size,
+                            Color = v.Color,
+                            Price = v.Price,
+                            Stock = v.Stock,
+                            IsActive = true,
+                            CreatedDate = DateTime.Now
+                        }).ToList();
+
+                    _productVariantService.ReplaceVariants(product.Id, variants);
+                }
                 return RedirectToAction("Index");
             }
             catch (System.Exception ex)

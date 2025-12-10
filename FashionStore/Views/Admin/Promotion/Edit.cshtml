@@ -1,0 +1,178 @@
+@model FashionStore.Models.Entities.Promotion
+@{
+    ViewBag.Title = "Chỉnh sửa khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-edit me-2"></i>Chỉnh sửa khuyến mãi #@Model.Id
+        </h5>
+        <a href="@Url.Action("Index", "AdminPromotion")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "AdminPromotion", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Description, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "3" })
+                    @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.PromotionType, new { @class = "form-label" })
+                            @Html.DropDownListFor(m => m.PromotionType, new SelectList(new[] {
+                                new { Value = "Percentage", Text = "Giảm theo phần trăm" },
+                                new { Value = "FixedAmount", Text = "Giảm số tiền cố định" },
+                                new { Value = "BuyXGetY", Text = "Mua X tặng Y" },
+                                new { Value = "FreeShipping", Text = "Miễn phí vận chuyển" }
+                            }, "Value", "Text", Model.PromotionType), new { @class = "form-select", required = "required" })
+                            @Html.ValidationMessageFor(m => m.PromotionType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.DiscountPercentage, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.DiscountPercentage, new { @class = "form-control", type = "number", min = "0", max = "100", step = "0.01" })
+                            @Html.ValidationMessageFor(m => m.DiscountPercentage, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.DiscountAmount, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.DiscountAmount, new { @class = "form-control", type = "number", min = "0", step = "1000" })
+                            @Html.ValidationMessageFor(m => m.DiscountAmount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.MinimumOrderAmount, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.MinimumOrderAmount, new { @class = "form-control", type = "number", min = "0", step = "1000" })
+                            @Html.ValidationMessageFor(m => m.MinimumOrderAmount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.MaximumDiscountAmount, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.MaximumDiscountAmount, new { @class = "form-control", type = "number", min = "0", step = "1000" })
+                            @Html.ValidationMessageFor(m => m.MaximumDiscountAmount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.StartDate, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local", required = "required" })
+                            @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.EndDate, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local", required = "required" })
+                            @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.UsageLimit, new { @class = "form-label" })
+                            @Html.TextBoxFor(m => m.UsageLimit, new { @class = "form-control", type = "number", min = "1" })
+                            @Html.ValidationMessageFor(m => m.UsageLimit, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="form-check mt-4">
+                                @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
+                                @Html.LabelFor(m => m.IsActive, new { @class = "form-check-label" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                    <a href="@Url.Action("Index", "AdminPromotion")" class="btn btn-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const promotionType = document.getElementById('PromotionType');
+        const discountPercentage = document.getElementById('DiscountPercentage');
+        const discountAmount = document.getElementById('DiscountAmount');
+        const percentageField = discountPercentage?.closest('.mb-3');
+        const amountField = discountAmount?.closest('.mb-3');
+
+        function toggleDiscountFields() {
+            if (!promotionType || !percentageField || !amountField) return;
+
+            const type = promotionType.value;
+            if (type === 'Percentage') {
+                percentageField.style.display = 'block';
+                amountField.style.display = 'none';
+                if (discountAmount) discountAmount.value = '';
+            } else if (type === 'FixedAmount') {
+                percentageField.style.display = 'none';
+                amountField.style.display = 'block';
+                if (discountPercentage) discountPercentage.value = '';
+            } else if (type === 'FreeShipping') {
+                percentageField.style.display = 'none';
+                amountField.style.display = 'none';
+                if (discountPercentage) discountPercentage.value = '';
+                if (discountAmount) discountAmount.value = '';
+            } else {
+                percentageField.style.display = 'block';
+                amountField.style.display = 'block';
+            }
+        }
+
+        if (promotionType) {
+            promotionType.addEventListener('change', toggleDiscountFields);
+            toggleDiscountFields();
+        }
+    });
+</script>
+

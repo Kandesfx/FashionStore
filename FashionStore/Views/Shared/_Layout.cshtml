@@ -683,6 +683,14 @@
 
                             @if (Session["UserId"] != null)
                             {
+                                <!-- Nút quản lý đánh giá cho Admin -->
+                                if (Session["Role"] != null && Session["Role"].ToString() == "Admin")
+                                {
+                                    <a href="@Url.Action("Index", "AdminReview")" class="icon-link me-3" title="Quản lý đánh giá" style="color: #ffc107;">
+                                        <i class="fas fa-star"></i>
+                                    </a>
+                                }
+
                                 <div class="dropdown">
                                     <a class="icon-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-user"></i>
@@ -690,6 +698,12 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="@Url.Action("UserProfile", "Account")"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
                                         <li><a class="dropdown-item" href="@Url.Action("MyOrders", "Order")"><i class="fas fa-box me-2"></i>Đơn hàng</a></li>
+                                        @if (Session["Role"] != null && Session["Role"].ToString() == "Admin")
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("Index", "AdminDashboard")"><i class="fas fa-tachometer-alt me-2"></i>Admin Panel</a></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("Index", "AdminReview")"><i class="fas fa-star me-2"></i>Quản lý đánh giá</a></li>
+                                        }
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                                     </ul>

@@ -1,0 +1,398 @@
+@{
+    ViewBag.Title = "Chi tiết đánh giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@if (ViewBag.Review == null)
+{
+    <div class="alert alert-danger">
+        Đánh giá không tồn tại.
+    </div>
+    return;
+}
+
+@{
+    var review = ViewBag.Review;
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-star me-2"></i>Chi tiết đánh giá #@review.Id
+        </h5>
+        <a href="@Url.Action("Index", "AdminReview")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Review Information -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin đánh giá</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Sản phẩm:</strong><br />
+                            @if (review.Product != null)
+                            {
+                                <a href="@Url.Action("Details", "Product", new { id = review.ProductId })" target="_blank">
+                                    @review.Product.ProductName
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">ID: @review.ProductId</span>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Người đánh giá:</strong><br />
+                            @if (review.User != null)
+                            {
+                                <span>@review.User.Username</span>
+                                if (review.IsVerifiedPurchase)
+                                {
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-check-circle"></i> Đã mua hàng
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Điểm đánh giá:</strong><br />
+                            <div class="d-flex align-items-center">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fas fa-star fa-lg @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                }
+                                <span class="ms-2 fs-5"><strong>@review.Rating/5</strong></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Trạng thái:</strong><br />
+                            @if (review.Status == "Pending")
+                            {
+                                <span class="badge bg-warning fs-6">
+                                    <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                </span>
+                            }
+                            else if (review.Status == "Approved")
+                            {
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-check me-1"></i>Đã duyệt
+                                </span>
+                            }
+                            else if (review.Status == "Rejected")
+                            {
+                                <span class="badge bg-danger fs-6">
+                                    <i class="fas fa-times me-1"></i>Đã từ chối
+                                </span>
+                            }
+                            else if (review.Status == "Reported")
+                            {
+                                <span class="badge bg-danger fs-6">
+                                    <i class="fas fa-flag me-1"></i>Bị báo cáo
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(review.Title))
+                    {
+                        <div class="mb-3">
+                            <strong>Tiêu đề:</strong><br />
+                            <p class="mb-0">@review.Title</p>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <strong>Nội dung đánh giá:</strong><br />
+                        <p class="mb-0">@(string.IsNullOrEmpty(review.ReviewText) ? "(Không có nội dung)" : review.ReviewText)</p>
+                    </div>
+
+                    @if (review.ReviewImages != null && review.ReviewImages.Count > 0)
+                    {
+                        <div class="mb-3">
+                            <strong>Ảnh đính kèm:</strong><br />
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                @foreach (var image in review.ReviewImages)
+                                {
+                                    <img src="@image.ImageUrl" alt="Review image" 
+                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;"
+                                         onclick="window.open('@image.ImageUrl', '_blank')" />
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-thumbs-up me-1"></i>Hữu ích: @review.HelpfulCount
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-thumbs-down me-1"></i>Không hữu ích: @review.NotHelpfulCount
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                <i class="fas fa-flag me-1"></i>Báo cáo: @review.ReportCount
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <strong>Ngày tạo:</strong> @review.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")
+                            </small>
+                        </div>
+                        @{
+                            var updatedDate = review.UpdatedDate as DateTime?;
+                            var reviewedDate = review.ReviewedDate as DateTime?;
+                        }
+                        @if (updatedDate.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <strong>Ngày cập nhật:</strong> @updatedDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                </small>
+                            </div>
+                        }
+                        @if (reviewedDate.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <strong>Ngày duyệt:</strong> @reviewedDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                                </small>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(review.AdminNotes))
+                    {
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <strong>Ghi chú admin:</strong><br />
+                            <p class="mb-0">@review.AdminNotes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Admin Reply Form -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-reply me-2"></i>Phản hồi đánh giá</h6>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("ReplyToReview", "AdminReview", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="reviewId" value="@review.Id" />
+                        <div class="mb-2">
+                            <textarea name="replyText" class="form-control" rows="3" 
+                                      placeholder="Nhập phản hồi của bạn..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Gửi phản hồi
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Bình luận 
+                        (@(ViewBag.Comments != null ? ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Comments).Count() : 0))
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Comments != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Comments).Any())
+                    {
+                        foreach (var comment in ViewBag.Comments)
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>@(comment.User?.Username ?? "N/A")</strong>
+                                            @if (comment.IsAdminReply)
+                                            {
+                                                <span class="badge bg-primary ms-2">Admin</span>
+                                            }
+                                            <span class="badge ms-2 @(comment.Status == "Approved" ? "bg-success" : comment.Status == "Rejected" ? "bg-danger" : "bg-warning")">
+                                                @comment.Status
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">@comment.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                        <p class="mb-2 mt-2">@comment.CommentText</p>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        @if (comment.Status != "Approved")
+                                        {
+                                            <form method="post" action="@Url.Action("ApproveComment", new { commentId = comment.Id, reviewId = review.Id })" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-success btn-sm" title="Duyệt">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (comment.Status != "Rejected")
+                                        {
+                                            <form method="post" action="@Url.Action("RejectComment", new { commentId = comment.Id, reviewId = review.Id })" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="reason" value="Không phù hợp" />
+                                                <button type="submit" class="btn btn-warning btn-sm" title="Từ chối">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <form method="post" action="@Url.Action("DeleteComment", new { commentId = comment.Id, reviewId = review.Id })" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">Chưa có bình luận nào.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Reports -->
+            @if (ViewBag.Reports != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reports).Any())
+            {
+                <div class="card mt-3">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-flag me-2"></i>Báo cáo 
+                            (@((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Reports).Count())
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var report in ViewBag.Reports)
+                        {
+                            <div class="border-bottom pb-2 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>@report.ReportType</strong>
+                                        <br />
+                                        <small class="text-muted">Bởi: @(report.User?.Username ?? "N/A") - @report.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                        <br />
+                                        <small><strong>Lý do:</strong> @report.Reason</small>
+                                        @if (!string.IsNullOrEmpty(report.Description))
+                                        {
+                                            <br />
+                                            <small>@report.Description</small>
+                                        }
+                                    </div>
+                                    <span class="badge @(report.Status == "Pending" ? "bg-warning" : report.Status == "Resolved" ? "bg-success" : "bg-secondary")">
+                                        @report.Status
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        <a href="@Url.Action("Reports", "AdminReview", new { status = "Pending" })" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-list me-1"></i>Xem tất cả báo cáo
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <!-- Actions -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Thao tác</h6>
+                </div>
+                <div class="card-body">
+                    @if (review.Status == "Pending" || review.Status == "Reported")
+                    {
+                        <form method="post" action="@Url.Action("Approve", new { id = review.Id })" class="mb-2">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-2">
+                                <label class="form-label">Ghi chú (tùy chọn):</label>
+                                <textarea name="adminNotes" class="form-control form-control-sm" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-check me-1"></i>Duyệt đánh giá
+                            </button>
+                        </form>
+
+                        <form method="post" action="@Url.Action("Reject", new { id = review.Id })">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-2">
+                                <label class="form-label">Lý do từ chối:</label>
+                                <textarea name="reason" class="form-control form-control-sm" rows="2" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100" 
+                                    onclick="return confirm('Bạn có chắc muốn từ chối đánh giá này?');">
+                                <i class="fas fa-times me-1"></i>Từ chối đánh giá
+                            </button>
+                        </form>
+                    }
+
+                    <hr />
+
+                    <form method="post" action="@Url.Action("Delete", new { id = review.Id })" 
+                          onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-trash me-1"></i>Xóa đánh giá
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Information -->
+            @{
+                var orderId = review.OrderId as int?;
+            }
+            @if (orderId.HasValue)
+            {
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Thông tin đơn hàng</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                            <strong>Mã đơn:</strong> #@orderId<br />
+                            <a href="@Url.Action("Details", "AdminOrder", new { id = orderId })" target="_blank">
+                                Xem chi tiết đơn hàng
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

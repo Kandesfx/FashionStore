@@ -1,0 +1,179 @@
+@{
+    ViewBag.Title = "Quản lý khuyến mãi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-tags me-2"></i>Quản lý khuyến mãi
+        </h5>
+        <a href="@Url.Action("Create", "AdminPromotion")" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Thêm khuyến mãi mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (ViewBag.Promotions != null && ((System.Collections.Generic.IEnumerable<dynamic>)ViewBag.Promotions).Any())
+    {
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên khuyến mãi</th>
+                        <th>Loại</th>
+                        <th>Giảm giá</th>
+                        <th>Thời gian</th>
+                        <th>Sử dụng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var promotion in ViewBag.Promotions)
+                    {
+                        var now = DateTime.Now;
+                        bool isActive = promotion.IsActive && promotion.StartDate <= now && promotion.EndDate >= now;
+                        bool isExpired = promotion.EndDate < now;
+                        
+                        <tr>
+                            <td><strong>#@promotion.Id</strong></td>
+                            <td>
+                                <strong>@promotion.Name</strong>
+                                @if (!string.IsNullOrEmpty(promotion.Description))
+                                {
+                                    <br />
+                                    <small class="text-muted">@(promotion.Description.Length > 50 ? promotion.Description.Substring(0, 50) + "..." : promotion.Description)</small>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-info">@promotion.PromotionType</span>
+                            </td>
+                            <td>
+                                @if (promotion.DiscountPercentage != null)
+                                {
+                                    <span class="text-success">@promotion.DiscountPercentage%</span>
+                                }
+                                else if (promotion.DiscountAmount != null)
+                                {
+                                    <span class="text-success">@promotion.DiscountAmount.ToString("N0") đ</span>
+                                }
+                                @if (promotion.MinimumOrderAmount != null)
+                                {
+                                    <br />
+                                    <small class="text-muted">Đơn tối thiểu: @promotion.MinimumOrderAmount.ToString("N0") đ</small>
+                                }
+                            </td>
+                            <td>
+                                <small>
+                                    <strong>Bắt đầu:</strong> @promotion.StartDate.ToString("dd/MM/yyyy")<br />
+                                    <strong>Kết thúc:</strong> @promotion.EndDate.ToString("dd/MM/yyyy")
+                                </small>
+                            </td>
+                            <td>
+                                @if (promotion.UsageLimit != null)
+                                {
+                                    <span>@promotion.UsedCount / @promotion.UsageLimit</span>
+                                }
+                                else
+                                {
+                                    <span>@promotion.UsedCount lượt</span>
+                                }
+                            </td>
+                            <td>
+                                @if (isActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Đang hoạt động
+                                    </span>
+                                }
+                                else if (isExpired)
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-clock me-1"></i>Hết hạn
+                                    </span>
+                                }
+                                else if (!promotion.IsActive)
+                                {
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-pause me-1"></i>Tạm dừng
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-calendar me-1"></i>Chưa bắt đầu
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="@Url.Action("Details", new { id = promotion.Id })" 
+                                       class="btn btn-info" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", new { id = promotion.Id })" 
+                                       class="btn btn-warning" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="@Url.Action("Delete", new { id = promotion.Id })" 
+                                          style="display: inline;" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger" title="Xóa"
+                                                onclick="return confirm('Bạn có chắc muốn xóa khuyến mãi này?');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Chưa có khuyến mãi nào.</p>
+            <a href="@Url.Action("Create", "AdminPromotion")" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Thêm khuyến mãi đầu tiên
+            </a>
+        </div>
+    }
+</div>
+

@@ -1,5 +1,6 @@
 using FashionStore.Models.Entities;
 using FashionStore.Models.ViewModels;
+using System;
 using System.Collections.Generic;
 
 namespace FashionStore.Services.Interfaces
@@ -18,6 +19,13 @@ namespace FashionStore.Services.Interfaces
         bool ValidateOrder(List<OrderDetail> orderDetails);
         IEnumerable<Order> GetOrdersByStatus(string status);
         OrderStatistics GetOrderStatistics();
+        
+        // Extended statistics
+        decimal GetRevenueByDateRange(DateTime startDate, DateTime endDate);
+        int GetOrderCountByDateRange(DateTime startDate, DateTime endDate);
+        IEnumerable<TopProductViewModel> GetTopSellingProducts(int topCount = 10, DateTime? startDate = null, DateTime? endDate = null);
+        List<RevenueChartData> GetRevenueByMonth(int months = 6);
+        List<OrderChartData> GetOrdersByStatusChart();
     }
 
     public class OrderStatistics

@@ -60,6 +60,30 @@
                             <span>Người dùng</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "AdminReview")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "AdminReview" ? "active" : "")">
+                            <i class="fas fa-star"></i>
+                            <span>Đánh giá & Bình luận</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "AdminInventory")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "AdminInventory" ? "active" : "")">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Quản lý kho</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "AdminPromotion")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "AdminPromotion" ? "active" : "")">
+                            <i class="fas fa-tags"></i>
+                            <span>Khuyến mãi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "AdminCoupon")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "AdminCoupon" ? "active" : "")">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Mã giảm giá</span>
+                        </a>
+                    </li>
                     <li class="nav-divider"></li>
                     <li class="nav-item">
                         <a href="@Url.Action("Index", "Home")" class="nav-link" target="_blank">

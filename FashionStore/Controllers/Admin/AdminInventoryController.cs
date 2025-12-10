@@ -73,13 +73,14 @@ namespace FashionStore.Controllers.Admin
         // POST: Admin/Inventory/Import
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Import(int productId, int quantity, string notes)
+        public ActionResult Import(int productId, int quantity, string notes, int? productVariantId = null)
         {
             try
             {
                 int userId = GetCurrentUserId();
-                _inventoryService.ImportStock(productId, quantity, notes, userId);
-                TempData["SuccessMessage"] = $"Đã nhập {quantity} sản phẩm vào kho thành công.";
+                _inventoryService.ImportStock(productId, quantity, notes, userId, productVariantId);
+                string variantMsg = productVariantId.HasValue ? " (biến thể)" : "";
+                TempData["SuccessMessage"] = $"Đã nhập {quantity} sản phẩm{variantMsg} vào kho thành công.";
             }
             catch (Exception ex)
             {
@@ -165,7 +166,7 @@ namespace FashionStore.Controllers.Admin
 
         // GET: Admin/Inventory/GetProductStock
         [HttpGet]
-        public JsonResult GetProductStock(int productId)
+        public JsonResult GetProductStock(int productId, int? productVariantId = null)
         {
             try
             {
@@ -175,8 +176,39 @@ namespace FashionStore.Controllers.Admin
                     return Json(new { success = false, message = "Sản phẩm không tồn tại" }, JsonRequestBehavior.AllowGet);
                 }
 
-                var currentStock = _inventoryService.GetCurrentStock(productId);
+                var currentStock = _inventoryService.GetCurrentStock(productId, productVariantId);
                 return Json(new { success = true, stock = currentStock, productName = product.ProductName }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // GET: Admin/Inventory/GetVariants
+        [HttpGet]
+        public JsonResult GetVariants(int productId)
+        {
+            try
+            {
+                var product = _productService.GetById(productId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var variants = _productService.GetVariantsByProductId(productId)
+                    .Where(v => v.IsActive)
+                    .Select(v => new
+                    {
+                        v.Id,
+                        v.VariantName,
+                        v.Size,
+                        v.Color,
+                        v.Stock
+                    }).ToList();
+
+                return Json(new { success = true, variants }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {

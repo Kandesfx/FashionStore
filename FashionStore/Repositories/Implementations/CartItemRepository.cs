@@ -17,6 +17,7 @@ namespace FashionStore.Repositories.Implementations
         {
             return _dbSet
                 .Include("Product")
+                .Include("ProductVariant")
                 .Where(ci => ci.CartId == cartId)
                 .ToList();
         }

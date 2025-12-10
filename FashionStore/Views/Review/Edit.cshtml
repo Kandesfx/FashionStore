@@ -1,0 +1,155 @@
+@model FashionStore.Models.ViewModels.UpdateReviewViewModel
+@{
+    ViewBag.Title = "Chỉnh sửa đánh giá";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .review-form-section {
+        padding: 60px 0;
+        background: #f8f9fa;
+    }
+
+    .review-form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .star-rating {
+        font-size: 32px;
+        cursor: pointer;
+        color: #ddd;
+    }
+
+    .star-rating .fas.fa-star {
+        transition: color 0.2s;
+    }
+
+    .star-rating .fas.fa-star.active,
+    .star-rating .fas.fa-star:hover {
+        color: #ffc107;
+    }
+</style>
+
+<div class="review-form-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Product", "Review", new { productId = ViewBag.Review.ProductId })">Đánh giá</a></li>
+                        <li class="breadcrumb-item active">Chỉnh sửa</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="review-form-card">
+            <h3 class="mb-4">Chỉnh sửa đánh giá</h3>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            @using (Html.BeginForm("Edit", "Review", new { id = ViewBag.Review.Id }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Điểm đánh giá <span class="text-danger">*</span></label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fas fa-star @(i <= Model.Rating ? "active" : "")" 
+                               data-rating="@i" 
+                               style="@(i <= Model.Rating ? "color: #ffc107;" : "")"></i>
+                        }
+                    </div>
+                    @Html.HiddenFor(m => m.Rating, new { id = "ratingValue" })
+                    @Html.ValidationMessageFor(m => m.Rating, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.Title, new { @class = "form-label fw-bold" })
+                    @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Tiêu đề đánh giá (tùy chọn)" })
+                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.ReviewText, new { @class = "form-label fw-bold" })
+                    @Html.TextAreaFor(m => m.ReviewText, new { @class = "form-control", rows = "6", placeholder = "Chia sẻ trải nghiệm của bạn về sản phẩm này..." })
+                    @Html.ValidationMessageFor(m => m.ReviewText, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Sau khi chỉnh sửa, đánh giá của bạn sẽ được gửi lại để admin duyệt.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                    <a href="@Url.Action("Product", "Review", new { productId = ViewBag.Review.ProductId })" class="btn btn-secondary">
+                        Hủy
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // Star rating
+    const stars = document.querySelectorAll('#starRating .fa-star');
+    const ratingInput = document.getElementById('ratingValue');
+    const initialRating = @Model.Rating;
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            ratingInput.value = rating;
+            
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                    s.style.color = '#ffc107';
+                } else {
+                    s.classList.remove('active');
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+    });
+
+    document.getElementById('starRating').addEventListener('mouseleave', function() {
+        const currentRating = parseInt(ratingInput.value) || initialRating;
+        stars.forEach((s, index) => {
+            if (index < currentRating) {
+                s.style.color = '#ffc107';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+</script>
+

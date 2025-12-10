@@ -13,14 +13,16 @@ namespace FashionStore.Services.Implementations
         private readonly ICartRepository _cartRepository;
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IProductVariantService _productVariantService;
         private readonly IUnitOfWork _unitOfWork;
 
         public CartService(ICartRepository cartRepository, ICartItemRepository cartItemRepository, 
-            IProductRepository productRepository, IUnitOfWork unitOfWork)
+            IProductRepository productRepository, IProductVariantService productVariantService, IUnitOfWork unitOfWork)
         {
             _cartRepository = cartRepository;
             _cartItemRepository = cartItemRepository;
             _productRepository = productRepository;
+            _productVariantService = productVariantService;
             _unitOfWork = unitOfWork;
         }
 
@@ -41,7 +43,7 @@ namespace FashionStore.Services.Implementations
             return cart;
         }
 
-        public void AddToCart(int userId, int productId, int quantity)
+        public void AddToCart(int userId, int productId, int quantity, int? productVariantId = null)
         {
             if (quantity <= 0)
                 throw new ArgumentException("Số lượng phải lớn hơn 0");
@@ -50,7 +52,25 @@ namespace FashionStore.Services.Implementations
             if (product == null || !product.IsActive)
                 throw new InvalidOperationException("Sản phẩm không tồn tại hoặc đã ngừng bán");
 
-            if (product.Stock < quantity)
+            int availableStock = product.Stock;
+            decimal itemPrice = product.Price;
+
+            // If variant is selected, use variant stock and price
+            if (productVariantId.HasValue)
+            {
+                var variants = _productVariantService.GetByProductId(productId);
+                var variant = variants.FirstOrDefault(v => v.Id == productVariantId.Value && v.IsActive);
+                if (variant == null)
+                    throw new InvalidOperationException("Biến thể sản phẩm không tồn tại");
+
+                availableStock = variant.Stock;
+                if (variant.Price.HasValue)
+                {
+                    itemPrice = variant.Price.Value;
+                }
+            }
+
+            if (availableStock < quantity)
                 throw new InvalidOperationException("Số lượng tồn kho không đủ");
 
             var cart = GetCartByUserId(userId);
@@ -59,12 +79,16 @@ namespace FashionStore.Services.Implementations
                 cart = CreateCart(userId);
             }
 
-            // Check if product already in cart
-            var existingItem = _cartItemRepository.SingleOrDefault(ci => ci.CartId == cart.Id && ci.ProductId == productId);
+            // Check if product (with same variant) already in cart
+            var existingItem = _cartItemRepository.SingleOrDefault(ci => 
+                ci.CartId == cart.Id && 
+                ci.ProductId == productId && 
+                ci.ProductVariantId == productVariantId);
+            
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
-                if (existingItem.Quantity > product.Stock)
+                if (existingItem.Quantity > availableStock)
                     throw new InvalidOperationException("Số lượng vượt quá tồn kho");
                 _cartItemRepository.Update(existingItem);
             }
@@ -74,6 +98,7 @@ namespace FashionStore.Services.Implementations
                 {
                     CartId = cart.Id,
                     ProductId = productId,
+                    ProductVariantId = productVariantId,
                     Quantity = quantity,
                     AddedDate = DateTime.Now
                 };
@@ -162,8 +187,15 @@ namespace FashionStore.Services.Implementations
                     Price = ci.Product.Price,
                     DiscountPrice = ci.Product.DiscountPrice,
                     Quantity = ci.Quantity,
-                    Stock = ci.Product.Stock,
-                    SubTotal = ci.Quantity * ci.Product.FinalPrice
+                    Stock = ci.ProductVariantId.HasValue && ci.ProductVariant != null 
+                        ? ci.ProductVariant.Stock 
+                        : ci.Product.Stock,
+                    ProductVariantId = ci.ProductVariantId,
+                    Size = ci.ProductVariant != null ? ci.ProductVariant.Size : null,
+                    Color = ci.ProductVariant != null ? ci.ProductVariant.Color : null,
+                    SubTotal = ci.Quantity * (ci.ProductVariantId.HasValue && ci.ProductVariant != null && ci.ProductVariant.Price.HasValue
+                        ? ci.ProductVariant.Price.Value
+                        : ci.Product.FinalPrice)
                 }).ToList();
 
             return new CartViewModel

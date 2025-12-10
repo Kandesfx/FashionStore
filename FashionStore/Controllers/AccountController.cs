@@ -324,11 +324,11 @@ namespace FashionStore.Controllers
                 ModelState.Clear();
                 return View(new ChangePasswordViewModel());
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("", "Đổi mật khẩu không hợp lệ.");
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
             }

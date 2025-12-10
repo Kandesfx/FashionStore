@@ -42,6 +42,18 @@ namespace FashionStore.Models.ViewModels
         // Additional properties for display
         public string CategoryName { get; set; }
         public decimal FinalPrice => DiscountPrice ?? Price;
+
+        // Variants (size, color, SKU, price, stock)
+        public System.Collections.Generic.List<ProductVariantInput> Variants { get; set; } = new System.Collections.Generic.List<ProductVariantInput>();
+    }
+
+    public class ProductVariantInput
+    {
+        public string SKU { get; set; }
+        public string Size { get; set; }
+        public string Color { get; set; }
+        public decimal? Price { get; set; }
+        public int Stock { get; set; }
     }
 }
 
