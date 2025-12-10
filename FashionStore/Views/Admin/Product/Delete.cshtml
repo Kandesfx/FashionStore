@@ -1,0 +1,73 @@
+@model FashionStore.Models.Entities.Product
+
+@{
+    ViewBag.Title = "Xóa sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-trash-alt me-2"></i>Xóa sản phẩm
+        </h5>
+        <a href="@Url.Action("Index", "AdminProduct")" class="btn btn-sm btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="p-4">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Cảnh báo:</strong> Bạn có chắc muốn xóa sản phẩm này? Sản phẩm sẽ được đánh dấu là không kích hoạt thay vì xóa hoàn toàn.
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.ProductName" class="img-fluid rounded" />
+                }
+            </div>
+            <div class="col-md-8">
+                <h4>@Model.ProductName</h4>
+                <hr />
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Mã sản phẩm:</strong>
+                        <p>#@Model.Id</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Giá:</strong>
+                        <p><strong>@Model.FinalPrice.ToString("N0") đ</strong></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Tồn kho:</strong>
+                        <p>@Model.Stock sản phẩm</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Danh mục:</strong>
+                        <p>@(Model.Category?.CategoryName ?? "N/A")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("DeleteConfirmed", "AdminProduct", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("id", Model.Id)
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                    <i class="fas fa-trash me-1"></i>Xác nhận xóa
+                </button>
+                <a href="@Url.Action("Index", "AdminProduct")" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </a>
+            </div>
+        }
+    </div>
+</div>
+

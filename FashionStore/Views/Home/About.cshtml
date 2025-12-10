@@ -1,0 +1,561 @@
+﻿
+@{
+    ViewBag.Title = "About";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.8)),
+                    url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200') center/cover;
+        color: white;
+        padding: 100px 0 80px;
+        text-align: center;
+        position: relative;
+    }
+
+    .about-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 56px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .about-hero p {
+        font-size: 20px;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.8;
+        opacity: 0.95;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px;
+        font-weight: 700;
+        color: #1a1a1a;
+        text-align: center;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 18px;
+        max-width: 700px;
+        margin: 0 auto 50px;
+        line-height: 1.8;
+    }
+
+    .section-divider {
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #c9a063, transparent);
+        margin: 20px auto 40px;
+    }
+
+    /* Story Section */
+    .story-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .story-card {
+        background: #f8f9fa;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .story-card h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+
+    .story-card p {
+        color: #666;
+        line-height: 1.9;
+        font-size: 16px;
+    }
+
+    .story-image {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        height: 100%;
+        min-height: 400px;
+    }
+
+    .story-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .story-image:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Values Section */
+    .values-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .value-card {
+        background: white;
+        padding: 40px 30px;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #c9a063, #d4b072);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        font-size: 36px;
+        color: white;
+        box-shadow: 0 5px 20px rgba(201, 160, 99, 0.3);
+    }
+
+    .value-card h4 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .value-card p {
+        color: #666;
+        line-height: 1.8;
+        font-size: 15px;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: white;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .stat-number {
+        font-family: 'Playfair Display', serif;
+        font-size: 56px;
+        font-weight: 700;
+        color: #c9a063;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 18px;
+        color: rgba(255,255,255,0.9);
+        font-weight: 500;
+        letter-spacing: 1px;
+    }
+
+    /* Team Section */
+    .team-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .team-card {
+        text-align: center;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .team-image {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        overflow: hidden;
+        border: 5px solid #f8f9fa;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .team-card:hover .team-image {
+        border-color: #c9a063;
+        transform: scale(1.05);
+    }
+
+    .team-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .team-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .team-position {
+        color: #c9a063;
+        font-size: 16px;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .team-social {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .team-social a {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1a1a1a;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .team-social a:hover {
+        background: #c9a063;
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+
+    .cta-section p {
+        font-size: 18px;
+        color: #666;
+        max-width: 700px;
+        margin: 0 auto 40px;
+        line-height: 1.8;
+    }
+
+    .btn-cta {
+        background: #1a1a1a;
+        color: white;
+        padding: 15px 50px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-cta:hover {
+        background: #c9a063;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .about-hero h1 {
+            font-size: 36px;
+        }
+
+        .about-hero p {
+            font-size: 16px;
+        }
+
+        .section-title {
+            font-size: 32px;
+        }
+
+        .stat-number {
+            font-size: 42px;
+        }
+
+        .story-image {
+            min-height: 300px;
+            margin-bottom: 30px;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <h1>Về FashionStore</h1>
+        <p>
+            Chúng tôi không chỉ bán quần áo, chúng tôi tạo ra phong cách sống.
+            Từ năm 2015, FashionStore đã đồng hành cùng hàng triệu khách hàng trên khắp Việt Nam.
+        </p>
+    </div>
+</section>
+
+<!-- Story Section -->
+<section class="story-section">
+    <div class="container">
+        <h2 class="section-title">Câu Chuyện Của Chúng Tôi</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Hành trình từ một cửa hàng nhỏ đến thương hiệu thời trang được yêu thích
+        </p>
+
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800" alt="Our Store">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="story-card">
+                    <h3>Khởi Đầu Từ Đam Mê</h3>
+                    <p>
+                        Năm 2015, với niềm đam mê về thời trang và mong muốn mang đến
+                        những sản phẩm chất lượng cao với giá cả hợp lý, chúng tôi đã
+                        thành lập FashionStore. Bắt đầu từ một cửa hàng nhỏ tại TP.HCM,
+                        chúng tôi đã không ngừng phát triển và mở rộng.
+                    </p>
+                    <p class="mb-0">
+                        Ngày nay, FashionStore tự hào là một trong những thương hiệu
+                        thời trang được yêu thích nhất tại Việt Nam với hơn 50 cửa hàng
+                        trên toàn quốc và hàng triệu khách hàng trung thành.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-center flex-lg-row-reverse">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800" alt="Our Mission">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="story-card">
+                    <h3>Sứ Mệnh & Tầm Nhìn</h3>
+                    <p>
+                        <strong>Sứ mệnh:</strong> Mang đến những sản phẩm thời trang
+                        chất lượng cao, phong cách hiện đại với giá cả phải chăng, giúp
+                        mọi người tự tin thể hiện phong cách riêng của mình.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Tầm nhìn:</strong> Trở thành thương hiệu thời trang
+                        hàng đầu Việt Nam, được biết đến với chất lượng sản phẩm tuyệt vời,
+                        dịch vụ khách hàng xuất sắc và cam kết phát triển bền vững.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="values-section">
+    <div class="container">
+        <h2 class="section-title">Giá Trị Cốt Lõi</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Những giá trị chúng tôi theo đuổi trong mọi hoạt động kinh doanh
+        </p>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h4>Chất Lượng</h4>
+                    <p>
+                        Cam kết mang đến sản phẩm chất lượng cao, từ chất liệu đến
+                        từng đường kim mũi chỉ.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Khách Hàng</h4>
+                    <p>
+                        Đặt khách hàng làm trung tâm, luôn lắng nghe và đáp ứng
+                        mọi nhu cầu.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>Sáng Tạo</h4>
+                    <p>
+                        Không ngừng đổi mới, sáng tạo để mang đến những thiết kế
+                        độc đáo và xu hướng.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Bền Vững</h4>
+                    <p>
+                        Cam kết với môi trường, sử dụng nguyên liệu thân thiện
+                        và quy trình sản xuất xanh.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                <div class="stat-card">
+                    <span class="stat-number">9+</span>
+                    <div class="stat-label">NĂM KINH NGHIỆM</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
+                    <div class="stat-label">CỬA HÀNG</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                <div class="stat-card">
+                    <span class="stat-number">2M+</span>
+                    <div class="stat-label">KHÁCH HÀNG</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">10K+</span>
+                    <div class="stat-label">SẢN PHẨM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="team-section">
+    <div class="container">
+        <h2 class="section-title">Đội Ngũ Của Chúng Tôi</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Những con người tài năng và tận tâm đằng sau thành công của FashionStore
+        </p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="~/Image/luan.jpg" alt="CEO">
+                    </div>
+                    <h5 class="team-name">Nguyễn Đắc Luận</h5>
+                    <p class="team-position">CEO & Founder</p>
+                    <div class="team-social">
+                        <a href="https://www.facebook.com/dac.luan.9406"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/dacluan.n/"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="~/Image/hai.jpg" alt="Creative Director">
+                    </div>
+                    <h5 class="team-name">Lê Vũ Hải</h5>
+                    <p class="team-position">Creative Director</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="~/Image/thuan.jpg" alt="Marketing Manager">
+                    </div>
+                    <h5 class="team-name">Lâm Phước Thuận</h5>
+                    <p class="team-position">Marketing Manager</p>
+                    <div class="team-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Sẵn Sàng Khám Phá?</h2>
+        <p>
+            Tham gia cùng hàng triệu khách hàng đã tin tưởng FashionStore.
+            Khám phá bộ sưu tập mới nhất của chúng tôi ngay hôm nay!
+        </p>
+        <a href="@Url.Action("Index", "Product")" class="btn-cta">
+            Xem Sản Phẩm
+        </a>
+    </div>
+</section>
+

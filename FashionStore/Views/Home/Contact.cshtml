@@ -1,0 +1,707 @@
+﻿
+@{
+    ViewBag.Title = "Contact";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .contact-hero {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.8)),
+                    url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200') center/cover;
+        color: white;
+        padding: 100px 0 80px;
+        text-align: center;
+        position: relative;
+    }
+
+    .contact-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 56px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .contact-hero p {
+        font-size: 20px;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.8;
+        opacity: 0.95;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px;
+        font-weight: 700;
+        color: #1a1a1a;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 18px;
+        max-width: 700px;
+        margin: 0 auto 50px;
+        line-height: 1.8;
+    }
+
+    .section-divider {
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #c9a063, transparent);
+        margin: 20px auto 40px;
+    }
+
+    /* Contact Info Section */
+    .contact-info-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .info-card {
+        background: #f8f9fa;
+        padding: 40px 30px;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        height: 100%;
+        border: 2px solid transparent;
+    }
+
+    .info-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        border-color: #c9a063;
+        background: white;
+    }
+
+    .info-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #c9a063, #d4b072);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        font-size: 36px;
+        color: white;
+        box-shadow: 0 5px 20px rgba(201, 160, 99, 0.3);
+    }
+
+    .info-card h4 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .info-card p {
+        color: #666;
+        line-height: 1.8;
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    .info-card a {
+        color: #c9a063;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .info-card a:hover {
+        color: #1a1a1a;
+    }
+
+    /* Contact Form Section */
+    .contact-form-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .form-container {
+        background: white;
+        padding: 50px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+        font-size: 15px;
+        display: block;
+    }
+
+    .contact-page .form-control {
+        border: 2px solid #e5e5e5;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-page .form-control:focus {
+        border-color: #c9a063;
+        box-shadow: 0 0 0 0.2rem rgba(201, 160, 99, 0.15);
+        outline: none;
+    }
+
+    .contact-page textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .btn-submit {
+        background: #1a1a1a;
+        color: white;
+        padding: 15px 50px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-submit:hover {
+        background: #c9a063;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .contact-image {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        height: 100%;
+        min-height: 500px;
+    }
+
+    .contact-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Map Section */
+    .map-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .map-container {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        height: 450px;
+    }
+
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* Store Locations */
+    .stores-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: white;
+    }
+
+    .stores-section .section-title,
+    .stores-section .section-subtitle {
+        color: white;
+    }
+
+    .store-card {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.1);
+        height: 100%;
+    }
+
+    .store-card:hover {
+        background: rgba(255,255,255,0.15);
+        transform: translateY(-5px);
+        border-color: #c9a063;
+    }
+
+    .store-card h5 {
+        font-family: 'Playfair Display', serif;
+        font-size: 22px;
+        color: #c9a063;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .store-info {
+        display: flex;
+        align-items: start;
+        margin-bottom: 15px;
+        gap: 15px;
+    }
+
+    .store-info i {
+        color: #c9a063;
+        font-size: 18px;
+        margin-top: 2px;
+        min-width: 20px;
+    }
+
+    .store-info p {
+        margin: 0;
+        line-height: 1.8;
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .faq-item {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px 30px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .faq-item:hover {
+        border-color: #c9a063;
+        background: white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .faq-question {
+        font-family: 'Playfair Display', serif;
+        font-size: 20px;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .faq-question i {
+        color: #c9a063;
+        font-size: 24px;
+    }
+
+    .faq-answer {
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 0;
+        padding-left: 39px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .contact-hero h1 {
+            font-size: 36px;
+        }
+
+        .contact-hero p {
+            font-size: 16px;
+        }
+
+        .section-title {
+            font-size: 32px;
+        }
+
+        .form-container {
+            padding: 30px 20px;
+        }
+
+        .contact-image {
+            min-height: 300px;
+            margin-bottom: 30px;
+        }
+
+        .map-container {
+            height: 300px;
+        }
+    }
+
+    /* Success Message */
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: none;
+    }
+</style>
+
+<div class="contact-page">
+
+<!-- Hero Section -->
+<section class="contact-hero">
+    <div class="container">
+        <h1>Liên Hệ Với Chúng Tôi</h1>
+        <p>
+            Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn.
+            Hãy liên hệ với chúng tôi qua bất kỳ kênh nào bạn thấy thuận tiện nhất.
+        </p>
+    </div>
+</section>
+
+<!-- Contact Info Section -->
+<section class="contact-info-section">
+    <div class="container">
+        <h2 class="section-title">Thông Tin Liên Hệ</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Nhiều cách để bạn có thể kết nối với chúng tôi
+        </p>
+
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h4>Điện Thoại</h4>
+                    <p>Hotline hỗ trợ 24/7</p>
+                    <a href="tel:19001234">1900 6677</a><br>
+                    <a href="tel:0901234567">034 576 5692</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Email</h4>
+                    <p>Gửi email cho chúng tôi</p>
+                    <a href="mailto:lamthuan271019@gmail.com">lamthuan271019@gmail.com</a><br>
+                    <a href="mailto:kandesfx@gmail.com">kandesfx@gmail.com</a><br>
+                    <a href="mailto:dac.luan.94066@gmail.con">dac.luan.94066@gmail.con</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h4>Địa Chỉ</h4>
+                    <p>Trụ sở chính</p>
+                    <p class="mb-0">140 Lê Trọng Tấn, Quận Tân Phú<br>TP. Hồ Chí Minh, Việt Nam</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fab fa-facebook-messenger"></i>
+                    </div>
+                    <h4>Facebook</h4>
+                    <p>Chat trực tiếp qua Messenger</p>
+                    <a href="#">m.me/fashionstore</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <h4>Instagram</h4>
+                    <p>Theo dõi chúng tôi</p>
+                    <a href="#">@@fashionstore.vn</a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h4>Zalo</h4>
+                    <p>Chat qua Zalo</p>
+                    <a href="#">086 842 2026</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form Section -->
+<section class="contact-form-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="contact-image">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800" alt="Contact Us">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-container">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 10px;">Gửi Tin Nhắn</h2>
+                    <p style="color: #666; margin-bottom: 30px;">Điền thông tin bên dưới và chúng tôi sẽ liên hệ lại trong thời gian sớm nhất</p>
+
+                    <div class="alert alert-success" id="successMessage">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.
+                    </div>
+
+                    <form id="contactForm" method="post" action="@Url.Action("Contact", "Home")">
+                        <div class="form-group">
+                            <label class="form-label">Họ và Tên *</label>
+                            <input type="text" class="form-control" name="FullName" placeholder="Nguyễn Văn A" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="Email" placeholder="example@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Số Điện Thoại *</label>
+                            <input type="tel" class="form-control" name="Phone" placeholder="0901234567" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Chủ Đề</label>
+                            <select class="form-control" name="Subject">
+                                <option value="">-- Chọn chủ đề --</option>
+                                <option value="product">Hỏi về sản phẩm</option>
+                                <option value="order">Đơn hàng của tôi</option>
+                                <option value="return">Đổi trả hàng</option>
+                                <option value="complaint">Khiếu nại</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nội Dung *</label>
+                            <textarea class="form-control" name="Message" placeholder="Nhập nội dung tin nhắn của bạn..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Gửi Tin Nhắn
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <div class="container">
+        <h2 class="section-title">Vị Trí Cửa Hàng</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Ghé thăm cửa hàng của chúng tôi để trải nghiệm trực tiếp
+        </p>
+
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.057272809945!2d106.62625947457528!3d10.806925558631358!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752be27ea41e05%3A0xfa77697a39f13ab0!2zMTQwIEzDqiBUcuG7jW5nIFThuqVuLCBUw6J5IFRo4bqhbmgsIFTDom4gUGjDuiwgVGjDoG5oIHBo4buRIEjhu5MgQ2jDrSBNaW5oIDcwMDAwMCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1765133330579!5m2!1svi!2s"
+                    allowfullscreen=""
+                    loading="lazy">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- Store Locations -->
+<section class="stores-section">
+    <div class="container">
+        <h2 class="section-title">Hệ Thống Cửa Hàng</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Với hơn 50 cửa hàng trên toàn quốc, chúng tôi luôn ở gần bạn
+        </p>
+
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="store-card">
+                    <h5>
+                        <i class="fas fa-store me-2"></i>
+                        Hà Giang
+                    </h5>
+                    <div class="store-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p><strong>Chi nhánh 1:</strong> Lũng Cú</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-clock"></i>
+                        <p>8:00 - 22:00 (Hàng ngày)</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-phone"></i>
+                        <p>086 842 2026</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="store-card">
+                    <h5>
+                        <i class="fas fa-store me-2"></i>
+                        Cà Mau
+                    </h5>
+                    <div class="store-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p><strong>Chi nhánh 1:</strong> Đất Mũi</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-clock"></i>
+                        <p>8:00 - 22:00 (Hàng ngày)</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-phone"></i>
+                        <p>098 768 6441</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="store-card">
+                    <h5>
+                        <i class="fas fa-store me-2"></i>
+                        Điện Biên
+                    </h5>
+                    <div class="store-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p><strong>Chi nhánh 1:</strong> A Pa Chải</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-clock"></i>
+                        <p>8:00 - 22:00 (Hàng ngày)</p>
+                    </div>
+                    <div class="store-info">
+                        <i class="fas fa-phone"></i>
+                        <p>034 576 5692</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <h2 class="section-title">Câu Hỏi Thường Gặp</h2>
+        <div class="section-divider"></div>
+        <p class="section-subtitle">
+            Một số câu hỏi thường gặp từ khách hàng
+        </p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Làm thế nào để tôi đặt hàng?</span>
+                    </div>
+                    <p class="faq-answer">
+                        Bạn có thể đặt hàng trực tuyến qua website hoặc đến trực tiếp các cửa hàng của chúng tôi.
+                        Để đặt hàng online, chỉ cần chọn sản phẩm, thêm vào giỏ hàng và thanh toán.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Thời gian giao hàng là bao lâu?</span>
+                    </div>
+                    <p class="faq-answer">
+                        Thời gian giao hàng thông thường là 2-3 ngày với nội thành và 3-5 ngày với tỉnh thành.
+                        Đối với các đơn hàng trong ngày, chúng tôi có dịch vụ giao hàng nhanh trong vòng 2-4 giờ.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Chính sách đổi trả như thế nào?</span>
+                    </div>
+                    <p class="faq-answer">
+                        Chúng tôi chấp nhận đổi trả trong vòng 7 ngày kể từ ngày nhận hàng với điều kiện
+                        sản phẩm còn nguyên tem mác, chưa qua sử dụng. Chi phí vận chuyển đổi trả sẽ do chúng tôi chi trả.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Các hình thức thanh toán được chấp nhận?</span>
+                    </div>
+                    <p class="faq-answer">
+                        Chúng tôi chấp nhận thanh toán qua nhiều hình thức: COD (thanh toán khi nhận hàng),
+                        chuyển khoản ngân hàng, thẻ tín dụng/ghi nợ, ví điện tử (MoMo, ZaloPay, VNPay).
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Làm sao để kiểm tra đơn hàng của tôi?</span>
+                    </div>
+                    <p class="faq-answer">
+                        Bạn có thể đăng nhập vào tài khoản và vào mục "Đơn hàng của tôi" để xem chi tiết.
+                        Hoặc liên hệ hotline 1900 1234 với mã đơn hàng để được hỗ trợ.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <script>
+    // Form submission handler
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Show success message
+        document.getElementById('successMessage').style.display = 'block';
+
+        // Reset form
+        this.reset();
+
+        // Scroll to success message
+        document.getElementById('successMessage').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        // Hide message after 5 seconds
+        setTimeout(function() {
+            document.getElementById('successMessage').style.display = 'none';
+        }, 5000);
+
+        // In production, you would submit the form data to server here
+        // Example: fetch('@Url.Action("Contact", "Home")', { method: 'POST', body: formData })
+    });
+    </script>
+}
+
+</div>
+

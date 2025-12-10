@@ -1,0 +1,113 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="stat-value">@(ViewBag.Statistics?.TotalOrders ?? 0)</div>
+        <div class="stat-label">Tổng đơn hàng</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-value">@((ViewBag.Statistics?.TotalRevenue ?? 0).ToString("N0")) đ</div>
+        <div class="stat-label">Tổng doanh thu</div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">@(ViewBag.Statistics?.PendingOrders ?? 0)</div>
+        <div class="stat-label">Đơn chờ xử lý</div>
+    </div>
+
+    <div class="stat-card info">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value">@(ViewBag.Statistics?.CompletedOrders ?? 0)</div>
+        <div class="stat-label">Đơn hoàn thành</div>
+    </div>
+
+    <div class="stat-card primary">
+        <div class="stat-icon">
+            <i class="fas fa-box"></i>
+        </div>
+        <div class="stat-value">@(ViewBag.TotalProducts ?? 0)</div>
+        <div class="stat-label">Tổng sản phẩm</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">@(ViewBag.TotalUsers ?? 0)</div>
+        <div class="stat-label">Tổng người dùng</div>
+    </div>
+</div>
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-list me-2"></i>Đơn hàng gần đây
+        </h5>
+        <a href="@Url.Action("Index", "AdminOrder")" class="btn btn-sm btn-primary">
+            <i class="fas fa-eye me-1"></i>Xem tất cả
+        </a>
+    </div>
+
+    @if (ViewBag.RecentOrders != null)
+    {
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in ViewBag.RecentOrders)
+                    {
+                        <tr>
+                            <td><strong>#@order.Id</strong></td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(order.User?.FullName ?? "N/A")</td>
+                            <td><strong>@order.TotalAmount.ToString("N0") đ</strong></td>
+                            <td>
+                                <span class="status-badge status-@order.Status.ToLower()">
+                                    @order.Status
+                                </span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "AdminOrder", new { id = order.Id })" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h4>Chưa có đơn hàng nào</h4>
+            <p>Hiện tại chưa có đơn hàng nào trong hệ thống.</p>
+        </div>
+    }
+</div>
+

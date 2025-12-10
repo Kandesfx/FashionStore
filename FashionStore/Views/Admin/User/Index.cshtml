@@ -1,0 +1,109 @@
+@{
+    ViewBag.Title = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-users me-2"></i>Danh sách người dùng
+        </h5>
+    </div>
+
+    @if (ViewBag.Users != null)
+    {
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in ViewBag.Users)
+                    {
+                        <tr>
+                            <td><strong>#@user.Id</strong></td>
+                            <td>
+                                <strong>@user.Username</strong>
+                            </td>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>@(user.Phone ?? "N/A")</td>
+                            <td>
+                                @if (user.Role != null)
+                                {
+                                    if (user.Role.RoleName == "Admin")
+                                    {
+                                        <span class="badge badge-danger">@user.Role.RoleName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-info">@user.Role.RoleName</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge badge-success">Kích hoạt</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">Tắt</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="@Url.Action("Details", "AdminUser", new { id = user.Id })" class="btn btn-sm btn-info" title="Chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "AdminUser", new { id = user.Id })" class="btn btn-sm btn-warning" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", "AdminUser", new { id = user.Id })" class="btn btn-sm btn-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h4>Chưa có người dùng nào</h4>
+            <p>Hiện tại chưa có người dùng nào trong hệ thống.</p>
+        </div>
+    }
+
+    @if (ViewBag.TotalPages != null && ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "AdminUser", new { page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+

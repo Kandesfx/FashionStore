@@ -1,0 +1,439 @@
+﻿
+@model FashionStore.Models.Entities.Order
+@{
+    ViewBag.Title = "Chi tiết đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var status = Model.Status ?? "Pending";
+    var orderItems = Model.OrderDetails ?? new List<FashionStore.Models.Entities.OrderDetail>();
+    var statusClass = "status-badge pending";
+
+    switch (status.ToLower())
+    {
+        case "processing":
+            statusClass = "status-badge processing";
+            break;
+        case "shipping":
+            statusClass = "status-badge shipping";
+            break;
+        case "completed":
+            statusClass = "status-badge completed";
+            break;
+        case "cancelled":
+            statusClass = "status-badge cancelled";
+            break;
+        case "failed":
+            statusClass = "status-badge failed";
+            break;
+        default:
+            statusClass = "status-badge pending";
+            break;
+    }
+}
+
+<style>
+    :root {
+        --primary: #c9a063;
+        --primary-dark: #a88041;
+        --bg: #f8f7f4;
+        --card: #ffffff;
+        --muted: #6c757d;
+        --border: #ececec;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        background: var(--bg);
+    }
+
+    .order-detail-page {
+        padding: 32px 0 48px;
+    }
+
+    .breadcrumb-custom {
+        font-size: 14px;
+        color: var(--muted);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .breadcrumb-custom a {
+        color: var(--primary-dark);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .page-title {
+        font-size: 30px;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin-bottom: 22px;
+        letter-spacing: -0.2px;
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        color: #1f1f1f;
+    }
+
+    .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .status-badge {
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-badge.pending { background: #fff3cd; color: #b38600; }
+    .status-badge.processing { background: #e0f0ff; color: #1769aa; }
+    .status-badge.shipping { background: #e8fff5; color: #0c9a6a; }
+    .status-badge.completed { background: #e8f7e4; color: #2f7a1f; }
+    .status-badge.cancelled { background: #fdecec; color: #c0392b; }
+    .status-badge.failed { background: #fdecec; color: #b23c17; }
+
+    .meta {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px 14px;
+        margin-top: 16px;
+    }
+
+    .meta .label {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    .meta .value {
+        font-size: 15px;
+        color: #222;
+        font-weight: 700;
+    }
+
+    .address-box, .note-box {
+        background: #f9fafb;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        color: #333;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .item {
+        display: grid;
+        grid-template-columns: 90px 1fr 120px;
+        gap: 14px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .item img {
+        width: 90px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fafafa;
+    }
+
+    .item-title {
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 6px;
+    }
+
+    .item-meta {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .price-block {
+        text-align: right;
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+
+    .price-block .qty {
+        display: block;
+        color: var(--muted);
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .summary-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .summary-row.total {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+
+    .button-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline,
+    .btn-primary,
+    .btn-danger {
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline {
+        border-color: var(--border);
+        color: #333;
+        background: #fff;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary-dark);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #c9a063, #d8b884);
+        color: #fff;
+        border: none;
+        box-shadow: 0 12px 30px rgba(201, 160, 99, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #b68a4f, #cba56c);
+    }
+
+    .btn-danger {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        box-shadow: 0 12px 30px rgba(231, 76, 60, 0.25);
+    }
+
+    .btn-danger:hover {
+        background: #cf3f30;
+    }
+
+    /* Responsive */
+    @@media (max-width: 991px) {
+        .grid-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .item {
+            grid-template-columns: 80px 1fr;
+            grid-template-areas:
+                "image title"
+                "image meta"
+                "price price";
+        }
+
+        .item img { grid-area: image; }
+        .item-title { grid-area: title; }
+        .item-meta { grid-area: meta; }
+        .price-block { grid-area: price; text-align: left; }
+
+        .button-row {
+            flex-direction: column;
+        }
+
+        .button-row a,
+        .button-row button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<section class="order-detail-page">
+    <div class="container">
+        <nav class="breadcrumb-custom">
+            <a href="@Url.Action("Index", "Home")">Trang chủ</a>
+            <span>/</span>
+            <a href="@Url.Action("MyOrders", "Order")">Đơn hàng của tôi</a>
+            <span>/</span>
+            <span>Chi tiết</span>
+        </nav>
+
+        <h1 class="page-title">Đơn hàng #@Model.Id</h1>
+
+        <div class="grid-layout">
+            <div class="card">
+                <div class="status-row">
+                    <div>
+                        <div class="section-title">Thông tin đơn hàng</div>
+                        <div class="meta">
+                            <div>
+                                <div class="label">Ngày đặt</div>
+                                <div class="value">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <div>
+                                <div class="label">Thanh toán</div>
+                                <div class="value">@(!string.IsNullOrEmpty(Model.PaymentMethod) ? Model.PaymentMethod : "COD")</div>
+                            </div>
+                            <div>
+                                <div class="label">Người nhận</div>
+                                <div class="value">@(Model.User?.FullName ?? Model.User?.Username ?? "Khách hàng")</div>
+                            </div>
+                            <div>
+                                <div class="label">Tổng tiền</div>
+                                <div class="value">@Model.TotalAmount.ToString("N0") đ</div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="@statusClass">@status</span>
+                </div>
+
+                <div class="section-title" style="margin-top:18px;">Địa chỉ giao hàng</div>
+                <div class="address-box">
+                    @( !string.IsNullOrEmpty(Model.ShippingAddress) ? Model.ShippingAddress : "Chưa cung cấp địa chỉ" )
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="section-title" style="margin-top:16px;">Ghi chú</div>
+                    <div class="note-box">
+                        @Model.Notes
+                    </div>
+                }
+            </div>
+
+            <div class="card">
+                <div class="section-title">Tóm tắt thanh toán</div>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span>Tạm tính</span>
+                        <span>@Model.TotalAmount.ToString("N0") đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span>0 đ</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Tổng cộng</span>
+                        <span>@Model.TotalAmount.ToString("N0") đ</span>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <a class="btn-outline" href="@Url.Action("MyOrders", "Order")">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại danh sách
+                    </a>
+
+                    @if (status.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+                    {
+                        using (Html.BeginForm("Cancel", "Order", new { id = Model.Id }, FormMethod.Post, new { @class = "d-inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-danger" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                                <i class="fas fa-times"></i>
+                                Hủy đơn hàng
+                            </button>
+                        }
+                    }
+                    else if (!status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) && !status.Equals("Failed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <a class="btn-primary" href="#">
+                            <i class="fas fa-truck"></i>
+                            Theo dõi đơn hàng
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <div class="section-title">Sản phẩm trong đơn</div>
+            <div class="items">
+                @if (!orderItems.Any())
+                {
+                    <div class="note-box">Đơn hàng chưa có sản phẩm.</div>
+                }
+                else
+                {
+                    foreach (var item in orderItems)
+                    {
+                        var product = item.Product;
+                        var imageUrl = !string.IsNullOrEmpty(product?.Detail1)
+                            ? product.Detail1
+                            : (!string.IsNullOrEmpty(product?.ImageUrl) ? product.ImageUrl : "/Image/no-image.png");
+                        <div class="item">
+                            <img src="@Url.Content(imageUrl)" alt="@product?.ProductName" />
+                            <div>
+                                <div class="item-title">@product?.ProductName ?? "Sản phẩm"</div>
+                                <div class="item-meta">Mã sản phẩm: @product?.Id</div>
+                            </div>
+                            <div class="price-block">
+                                @item.SubTotal.ToString("N0") đ
+                                <span class="qty">x @item.Quantity (@item.UnitPrice.ToString("N0") đ)</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</section>
+

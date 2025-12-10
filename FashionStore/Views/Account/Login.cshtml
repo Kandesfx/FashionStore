@@ -1,0 +1,565 @@
+@model FashionStore.Models.ViewModels.LoginViewModel
+
+@{
+    ViewBag.Title = "Đăng Nhập - Fashion Store";
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+            .login-header h2 {
+                font-size: 28px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .login-header p {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 0;
+            }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #333;
+        }
+
+            .form-control:focus {
+                border-color: #403B4A;
+                box-shadow: 0 0 0 0.2rem rgba(64, 59, 74, 0.15);
+                outline: none;
+            }
+
+            .form-control.is-invalid {
+                border-color: #dc3545;
+            }
+
+            .form-control.is-valid {
+                border-color: #28a745;
+            }
+
+                /* Hide all validation icons from Bootstrap */
+                .form-control.is-valid::after,
+                .form-control.is-valid::before,
+                .form-control.is-invalid::after,
+                .form-control.is-invalid::before,
+                .was-validated .form-control:valid::after,
+                .was-validated .form-control:valid::before,
+                .was-validated .form-control:invalid::after,
+                .was-validated .form-control:invalid::before,
+                .form-control.is-valid ~ .valid-feedback::before,
+                .form-control.is-invalid ~ .invalid-feedback::before {
+                    display: none !important;
+                    content: none !important;
+                }
+
+                /* Hide Bootstrap validation icons and feedback text */
+                .form-control.is-valid ~ .valid-feedback,
+                .form-control.is-invalid ~ .invalid-feedback {
+                    display: none !important;
+                }
+
+            /* Ensure no background images for validation icons */
+            .form-control.is-valid,
+            .form-control.is-invalid {
+                background-image: none !important;
+                padding-right: 15px !important;
+            }
+
+        .invalid-feedback {
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .valid-feedback {
+            display: none;
+        }
+
+        .field-validation-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .validation-summary-errors {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #721c24;
+        }
+
+            .validation-summary-errors ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+        .input-group-text {
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            color: #403B4A;
+            transition: all 0.3s ease;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .input-group:focus-within .input-group-text {
+            border-color: #403B4A;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #403B4A 0%, #E7E9BB 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(64, 59, 74, 0.4);
+            }
+
+            .btn-login:active {
+                transform: translateY(0);
+            }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 12px;
+        }
+
+            .forgot-password a {
+                color: #403B4A;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.3s ease;
+            }
+
+                .forgot-password a:hover {
+                    color: #E7E9BB;
+                    text-decoration: underline;
+                }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+        }
+
+            .register-link a {
+                color: #403B4A;
+                text-decoration: none;
+                font-weight: 600;
+                transition: color 0.3s ease;
+            }
+
+                .register-link a:hover {
+                    color: #E7E9BB;
+                }
+
+        /* Responsive */
+        @@media (max-width: 576px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+                .login-header h2 {
+                    font-size: 24px;
+                }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .login-container {
+                max-width: 100%;
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 991px) {
+            .login-container {
+                max-width: 500px;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .login-container {
+                max-width: 480px;
+            }
+        }
+
+        /* Loading animation */
+        .btn-login.loading {
+            pointer-events: none;
+            position: relative;
+        }
+
+            .btn-login.loading::after {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                top: 50%;
+                left: 50%;
+                margin-left: -10px;
+                margin-top: -10px;
+                border: 2px solid #ffffff;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+            }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-login.loading span {
+            visibility: hidden;
+        }
+
+        .remember-me {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .remember-me input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
+
+            .remember-me label {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+                cursor: pointer;
+            }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2><i class="fas fa-shopping-bag"></i> Fashion Store</h2>
+                <p>Đăng nhập để tiếp tục mua sắm</p>
+            </div>
+            <div class="login-body">
+                @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm", novalidate = "novalidate" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+
+                    <div class="mb-4">
+                        @Html.LabelFor(m => m.Username, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Nhập tên đăng nhập", required = "required" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", required = "required" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+                    </div>
+
+                    <div class="remember-me">
+                        @Html.CheckBoxFor(m => m.RememberMe)
+                        @Html.LabelFor(m => m.RememberMe)
+                    </div>
+
+                    <button type="submit" class="btn btn-login" id="submitBtn">
+                        <span><i class="fas fa-sign-in-alt"></i> Đăng Nhập</span>
+                    </button>
+
+                    <div class="register-link">
+                        Chưa có tài khoản? @Html.ActionLink("Đăng ký ngay", "Register", "Account", null, new { @class = "" })
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Count > 0)
+                {
+                    <div class="forgot-password" style="text-align: right; margin-top: 12px;">
+                        <a href="@Url.Action("ForgotPassword", "Account")"><i class="fas fa-key"></i> Quên mật khẩu?</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('Username');
+            const passwordInput = document.getElementById('Password');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Validation rules
+            const validationRules = {
+                username: {
+                    required: 'Vui lòng nhập tên đăng nhập',
+                    minLength: 'Tên đăng nhập phải có ít nhất 3 ký tự',
+                    maxLength: 'Tên đăng nhập không được quá 50 ký tự',
+                    pattern: 'Tên đăng nhập chỉ chứa chữ cái, số và dấu gạch dưới'
+                },
+                password: {
+                    required: 'Vui lòng nhập mật khẩu',
+                    minLength: 'Mật khẩu phải có ít nhất 6 ký tự'
+                }
+            };
+
+            // Validate username
+            function validateUsername(value) {
+                if (!value || !value.trim()) {
+                    return validationRules.username.required;
+                }
+                if (value.length < 3) {
+                    return validationRules.username.minLength;
+                }
+                if (value.length > 50) {
+                    return validationRules.username.maxLength;
+                }
+                if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                    return validationRules.username.pattern;
+                }
+                return null;
+            }
+
+            // Validate password
+            function validatePassword(value) {
+                if (!value) {
+                    return validationRules.password.required;
+                }
+                if (value.length < 6) {
+                    return validationRules.password.minLength;
+                }
+                return null;
+            }
+
+            // Show validation feedback (batch updates to prevent intermediate rendering)
+            function showFeedback(input, error) {
+                if (!input) return;
+
+                // Find validation message element
+                const validationMsg = input.closest('.mb-4, .mb-3')?.querySelector('.field-validation-error');
+
+                // Use requestAnimationFrame to batch DOM updates
+                requestAnimationFrame(function () {
+                    // Remove existing validation classes
+                    input.classList.remove('is-invalid', 'is-valid');
+
+                    if (error) {
+                        input.classList.add('is-invalid');
+                        if (validationMsg) {
+                            validationMsg.textContent = error;
+                            validationMsg.style.display = 'block';
+                        }
+                    } else {
+                        input.classList.add('is-valid');
+                        if (validationMsg) {
+                            validationMsg.style.display = 'none';
+                        }
+                    }
+                });
+            }
+
+            // Batch apply all validation feedback at once
+            function applyValidationResults(results) {
+                // Use requestAnimationFrame to ensure all updates happen in one frame
+                requestAnimationFrame(function () {
+                    if (results.username !== undefined && usernameInput) {
+                        usernameInput.classList.remove('is-invalid', 'is-valid');
+                        const usernameMsg = usernameInput.closest('.mb-4')?.querySelector('.field-validation-error');
+                        if (results.username) {
+                            usernameInput.classList.add('is-invalid');
+                            if (usernameMsg) {
+                                usernameMsg.textContent = results.username;
+                                usernameMsg.style.display = 'block';
+                            }
+                        } else {
+                            usernameInput.classList.add('is-valid');
+                            if (usernameMsg) {
+                                usernameMsg.style.display = 'none';
+                            }
+                        }
+                    }
+
+                    if (results.password !== undefined && passwordInput) {
+                        passwordInput.classList.remove('is-invalid', 'is-valid');
+                        const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
+                        if (results.password) {
+                            passwordInput.classList.add('is-invalid');
+                            if (passwordMsg) {
+                                passwordMsg.textContent = results.password;
+                                passwordMsg.style.display = 'block';
+                            }
+                        } else {
+                            passwordInput.classList.add('is-valid');
+                            if (passwordMsg) {
+                                passwordMsg.style.display = 'none';
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Form submission - no client-side validation, only server-side
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    // Clear any previous validation states
+                    if (usernameInput) {
+                        usernameInput.classList.remove('is-invalid', 'is-valid');
+                        const usernameMsg = usernameInput.closest('.mb-4')?.querySelector('.field-validation-error');
+                        if (usernameMsg) {
+                            usernameMsg.style.display = 'none';
+                        }
+                    }
+                    if (passwordInput) {
+                        passwordInput.classList.remove('is-invalid', 'is-valid');
+                        const passwordMsg = passwordInput.closest('.mb-3')?.querySelector('.field-validation-error');
+                        if (passwordMsg) {
+                            passwordMsg.style.display = 'none';
+                        }
+                    }
+
+                    // Add loading state
+                    if (submitBtn) {
+                        submitBtn.classList.add('loading');
+                    }
+
+                    // Let form submit normally - no client-side validation
+                    // Server will handle validation and return with errors if needed
+                });
+            }
+
+            // Check for server-side errors on page load and show border red
+            window.addEventListener('load', function () {
+                const validationSummary = document.querySelector('.validation-summary-errors');
+                if (validationSummary && validationSummary.textContent.trim() !== '') {
+                    // Server has returned with errors (wrong username/password)
+                    // Show red border on both fields
+                    if (usernameInput) {
+                        usernameInput.classList.remove('is-valid');
+                        usernameInput.classList.add('is-invalid');
+                    }
+                    if (passwordInput) {
+                        passwordInput.classList.remove('is-valid');
+                        passwordInput.classList.add('is-invalid');
+                    }
+                } else {
+                    // No errors from server - check if we should show green border
+                    // Only show green if form was submitted successfully (but this won't happen as it redirects)
+                    // So we don't show green border on page load
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
